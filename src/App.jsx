@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, createContext, useContext, useRef } f
 // SUPABASE CLIENT
 // ═══════════════════════════════════════════════════════════════════════
 const SU="https://efswwichqsireilbasvf.supabase.co";
-const SK="sb_publishable_wOs1Djp4TRJ8aLrqKlyEzw_C2GQjVI0";
+const SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmc3d3aWNocXNpcmVpbGJhc3ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NzkzNjYsImV4cCI6MjA5NDE1NTM2Nn0.GcdJfbyfwFNSQKRcRTcwbIqSSJga9BrctBd73Mt8Hk4";
 const sb=(()=>{let _t=null;try{_t=localStorage.getItem("sb_token")}catch{}
 const hd=(x={})=>({apikey:SK,"Content-Type":"application/json",...(_t?{Authorization:`Bearer ${_t}`}:{}),...x});
 return{
