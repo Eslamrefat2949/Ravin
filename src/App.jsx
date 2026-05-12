@@ -3,8 +3,8 @@ import { useState, useEffect, useCallback, createContext, useContext, useRef } f
 // ═══════════════════════════════════════════════════════════════════════
 // SUPABASE CLIENT
 // ═══════════════════════════════════════════════════════════════════════
-const SU="https://pjrrfghzoejdaeqcggwm.supabase.co";
-const SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqcnJmZ2h6b2VqZGFlcWNnZ3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NTUyMTUsImV4cCI6MjA5NDAzMTIxNX0.l8qaGu5RugONzN--mqzFwJqWAUgrmCWVghHgycVK_ws";
+const SU="https://efswwichqsireilbasvf.supabase.co";
+const SK="sb_publishable_wOs1Djp4TRJ8aLrqKlyEzw_C2GQjVI0";
 const sb=(()=>{let _t=null;try{_t=localStorage.getItem("sb_token")}catch{}
 const hd=(x={})=>({apikey:SK,"Content-Type":"application/json",...(_t?{Authorization:`Bearer ${_t}`}:{}),...x});
 return{
