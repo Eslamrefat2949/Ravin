@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAVIN ACADEMY — دليل المستخدم المصوّر</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#09090B;--card:#16161C;--card2:#1E1E24;--gold:#C89B4A;--gs:rgba(200,155,74,0.12);--gb:rgba(200,155,74,0.25);--green:#34A06C;--gns:rgba(52,160,108,0.12);--red:#D04545;--rs:rgba(208,69,69,0.12);--amber:#C47F1A;--as:rgba(196,127,26,0.12);--blue:#3A7DD6;--bs:rgba(58,125,214,0.12);--purple:#7B5CC4;--txt:#ECEBE6;--sub:#8B8A85;--mut:#55544F;--bd:rgba(255,255,255,0.06);}
+body{font-family:'Cairo',sans-serif;background:#050507;color:var(--txt);line-height:1.9;font-size:15px;}
+.wrap{max-width:860px;margin:0 auto;padding:20px 20px 80px;}
+
+/* Hero */
+.hero{text-align:center;padding:50px 20px 40px;background:linear-gradient(180deg,rgba(200,155,74,0.06) 0%,transparent 50%);margin-bottom:32px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--gs);border:1px solid var(--gb);border-radius:20px;padding:4px 14px;font-size:11px;color:var(--gold);font-weight:700;margin-bottom:16px;}
+.hero h1{font-size:32px;font-weight:900;letter-spacing:0.08em;}
+.hero h1 span{color:var(--gold);}
+.hero .sub{font-size:11px;color:var(--mut);letter-spacing:0.22em;margin:6px 0 16px;}
+.hero p{font-size:14px;color:var(--sub);max-width:540px;margin:0 auto;line-height:2;}
+
+/* Screen mockup */
+.screen{background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;margin:20px 0;box-shadow:0 8px 40px rgba(0,0,0,0.4);}
+.screen-bar{background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bd);padding:8px 14px;display:flex;align-items:center;gap:6px;}
+.screen-dot{width:7px;height:7px;border-radius:50%;}
+.screen-dot-r{background:#ff5f57;}.screen-dot-y{background:#ffbd2e;}.screen-dot-g{background:#28c840;}
+.screen-title{font-size:11px;color:var(--mut);margin-right:auto;margin-left:8px;font-weight:600;}
+.screen-body{padding:0;position:relative;overflow:hidden;}
+
+/* Annotation arrows */
+.anno{position:relative;margin:16px 0;}
+.anno-box{background:var(--gs);border:1px solid var(--gb);border-radius:12px;padding:14px 18px;margin:10px 0;}
+.anno-box .anno-num{display:inline-flex;width:24px;height:24px;border-radius:7px;background:var(--gold);color:#0A0A0A;font-weight:900;font-size:11px;align-items:center;justify-content:center;margin-left:8px;}
+.anno-box p{font-size:13px;color:var(--sub);display:inline;line-height:2;}
+.anno-box .bold{color:var(--txt);font-weight:700;}
+
+/* Inside mockup components */
+.m-sidebar{width:180px;background:rgba(9,9,11,0.98);border-left:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;height:100%;}
+.m-sb-logo{padding:14px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;}
+.m-sb-logo .logo-r{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--gold),#8B6A3A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#0A0A0A;}
+.m-sb-logo .logo-txt{font-size:11px;font-weight:900;letter-spacing:0.1em;color:var(--txt);}
+.m-sb-logo .logo-txt span{color:var(--gold);}
+.m-sb-item{display:flex;align-items:center;gap:7px;padding:6px 10px;margin:1px 6px;border-radius:6px;font-size:10px;color:var(--sub);cursor:default;}
+.m-sb-item.active{background:var(--gs);color:var(--gold);font-weight:700;border-right:2px solid var(--gold);}
+.m-sb-item .ico{font-size:11px;width:14px;text-align:center;}
+.m-sb-group{font-size:7px;font-weight:700;color:var(--mut);letter-spacing:0.14em;padding:10px 16px 3px;}
+.m-topbar{background:rgba(9,9,11,0.96);border-bottom:1px solid var(--bd);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
+.m-topbar h2{font-size:13px;font-weight:800;color:var(--txt);}
+.m-topbar .sub{font-size:9px;color:var(--mut);}
+.m-content{padding:16px 18px;min-height:200px;background:var(--bg);}
+
+/* KPI cards */
+.m-kpi{display:inline-flex;flex-direction:column;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;min-width:80px;margin:3px;}
+.m-kpi .val{font-size:18px;font-weight:800;}
+.m-kpi .lbl{font-size:7px;color:var(--mut);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px;}
+
+/* Chip */
+.m-chip{display:inline-block;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.05em;text-transform:uppercase;}
+
+/* Ring SVG */
+.m-ring{display:inline-block;position:relative;width:36px;height:36px;}
+.m-ring svg{transform:rotate(-90deg);}
+
+/* Check items */
+.m-check{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bd);}
+.m-check-box{width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;flex-shrink:0;}
+.m-check-done{background:var(--green);color:#fff;}
+.m-check-follow{background:var(--amber);color:#fff;}
+.m-check-not{background:var(--red);color:#fff;}
+.m-check-empty{border:1.5px solid var(--bd);}
+.m-check span{font-size:10px;color:var(--sub);}
+
+/* Section */
+.section{margin-bottom:48px;scroll-margin-top:20px;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.section-num{width:36px;height:36px;border-radius:10px;background:var(--gs);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:900;font-size:14px;flex-shrink:0;}
+.section h2{font-size:22px;font-weight:900;}
+.section .section-desc{font-size:13px;color:var(--sub);margin-bottom:20px;padding-right:48px;}
+
+/* Pointer overlay */
+.pointer{position:absolute;z-index:10;}
+.pointer-dot{width:28px;height:28px;border-radius:50%;border:3px solid var(--gold);background:rgba(200,155,74,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--gold);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,155,74,0.4);}50%{box-shadow:0 0 0 10px rgba(200,155,74,0);}}
+
+/* Inline table */
+.guide-tbl{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0;}
+.guide-tbl th{padding:8px 12px;text-align:right;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bd);color:var(--mut);font-weight:700;font-size:10px;}
+.guide-tbl td{padding:8px 12px;border-bottom:1px solid var(--bd);color:var(--sub);}
+
+/* Flow */
+.flow{display:flex;flex-direction:column;gap:0;margin:12px 0;}
+.flow-step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--bd);border-radius:8px;margin-bottom:3px;}
+.flow-step .fl-icon{font-size:16px;flex-shrink:0;}
+.flow-step span{font-size:12px;color:var(--sub);}
+.flow-arrow{text-align:center;color:var(--gold);font-size:16px;margin:1px 0;}
+
+/* Tip */
+.tip{background:var(--gs);border:1px solid var(--gb);border-radius:12px;padding:14px 18px;margin:16px 0;border-right:3px solid var(--gold);}
+.tip b{color:var(--gold);font-size:13px;}
+.tip p{font-size:12px;color:var(--sub);margin-top:4px;}
+
+.warn{background:var(--rs);border:1px solid rgba(208,69,69,0.2);border-radius:12px;padding:14px 18px;margin:16px 0;border-right:3px solid var(--red);}
+.warn b{color:var(--red);font-size:13px;}
+.warn p{font-size:12px;color:var(--sub);margin-top:4px;}
+
+/* Footer */
+.footer{text-align:center;padding:40px;border-top:1px solid var(--bd);margin-top:40px;}
+
+@media(max-width:640px){.wrap{padding:12px 12px 60px;} .hero h1{font-size:22px;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">📖 الدليل المصوّر الكامل</div>
+  <h1>RAVIN <span>ACADEMY</span></h1>
+  <div class="sub">MAKE UR WORLD TO BE PROUD</div>
+  <p>شرح كامل لكل شاشة في التطبيق بالصور والتفاصيل — عشان أي حد يقدر يستخدم النظام من أول يوم</p>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 1. LOGIN -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header"><span class="section-num">1</span><h2>شاشة تسجيل الدخول</h2></div>
+  <div class="section-desc">أول شاشة هتشوفها لما تفتح التطبيق — هنا بتدخل بالإيميل والباسوورد</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">ravin.academy</span></div>
+    <div class="screen-body" style="background:#050507;display:flex;align-items:center;justify-content:center;min-height:380px;position:relative;">
+      <!-- Ambient glow -->
+      <div style="position:absolute;top:15%;right:20%;width:300px;height:300px;background:radial-gradient(circle,rgba(200,155,74,0.06),transparent 60%);pointer-events:none;"></div>
+      <!-- Login card -->
+      <div style="width:320px;padding:32px 28px;background:rgba(24,24,29,0.8);border-radius:18px;border:1px solid var(--bd);position:relative;z-index:1;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#8B6A3A);display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#0A0A0A;margin-bottom:10px;">R</div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:0.1em;">RAVIN <span style="color:var(--gold);">ACADEMY</span></div>
+          <div style="font-size:8px;color:var(--mut);letter-spacing:0.22em;margin-top:4px;">MAKE UR WORLD TO BE PROUD</div>
+        </div>
+        <!-- Fields -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:8px;font-weight:700;color:var(--mut);letter-spacing:0.1em;margin-bottom:4px;">EMAIL</div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;font-size:11px;color:var(--sub);">admin@ravin.academy</div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="font-size:8px;font-weight:700;color:var(--mut);letter-spacing:0.1em;margin-bottom:4px;">PASSWORD</div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:7px;padding:8px 10px;font-size:11px;color:var(--sub);">••••••••</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;font-size:9px;">
+          <span style="color:var(--sub);">☑ Remember me</span>
+          <span style="color:var(--gold);font-weight:700;">Forgot password?</span>
+        </div>
+        <div style="background:var(--gold);color:#0A0A0A;border-radius:8px;padding:9px;font-weight:800;font-size:12px;text-align:center;">Sign In →</div>
+      </div>
+      <!-- Pointer annotations -->
+      <div class="pointer" style="top:115px;right:calc(50% - 190px);"><div class="pointer-dot">1</div></div>
+      <div class="pointer" style="top:180px;right:calc(50% - 190px);"><div class="pointer-dot">2</div></div>
+      <div class="pointer" style="top:265px;right:calc(50% - 190px);"><div class="pointer-dot">3</div></div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">1</span><p>اكتب <span class="bold">الإيميل</span> بتاعك اللي عملته في Supabase Auth</p></div>
+  <div class="anno-box"><span class="anno-num">2</span><p>اكتب <span class="bold">الباسوورد</span> — لازم يكون 6 حروف على الأقل</p></div>
+  <div class="anno-box"><span class="anno-num">3</span><p>دوس <span class="bold">Sign In</span> — لو البيانات صح هيدخلك على الداشبورد فورًا</p></div>
+
+  <div class="tip"><b>💡 أول مرة؟</b><p>لازم الأدمن يعملك حساب من Supabase Dashboard → Authentication → Users → Add User. هو اللي بيحدد إيميلك وباسووردك ودورك (Admin / Branch Manager / إلخ).</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 2. DASHBOARD -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header"><span class="section-num">2</span><h2>الداشبورد الرئيسي</h2></div>
+  <div class="section-desc">أول شاشة بتشوفها بعد الدخول — فيها ملخص كل حاجة في نظرة واحدة</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Dashboard</span></div>
+    <div class="screen-body" style="display:flex;min-height:460px;">
+      <!-- Sidebar -->
+      <div class="m-sidebar">
+        <div class="m-sb-logo"><div class="logo-r">R</div><div><div class="logo-txt">RAVIN <span>ACADEMY</span></div><div style="font-size:6px;color:var(--mut);letter-spacing:0.15em;">MAKE UR WORLD TO BE PROUD</div></div></div>
+        <div class="m-sb-group">CORE</div>
+        <div class="m-sb-item active"><span class="ico">◈</span>Dashboard</div>
+        <div class="m-sb-item"><span class="ico">⬡</span>War Room</div>
+        <div class="m-sb-group">OPS</div>
+        <div class="m-sb-item"><span class="ico">◉</span>Reports</div>
+        <div class="m-sb-item" style="color:rgba(200,155,74,0.6);"><span class="ico">✚</span>New Report</div>
+        <div class="m-sb-item"><span class="ico">☰</span>Tasks</div>
+        <div class="m-sb-item"><span class="ico">⚠</span>Incidents</div>
+        <div class="m-sb-group">COMMERCIAL</div>
+        <div class="m-sb-item"><span class="ico">◆</span>Sales & Targets</div>
+        <div class="m-sb-item"><span class="ico">◇</span>VM Academy</div>
+        <div class="m-sb-group">PEOPLE</div>
+        <div class="m-sb-item"><span class="ico">◑</span>Employees</div>
+        <div class="m-sb-item"><span class="ico">⊞</span>Learning</div>
+        <div class="m-sb-item"><span class="ico">★</span>CX Readiness</div>
+        <div class="m-sb-group">INTEL</div>
+        <div class="m-sb-item"><span class="ico">✦</span>AI Insights</div>
+        <div class="m-sb-item"><span class="ico">◎</span>Notifications <span style="background:var(--red);color:#fff;font-size:7px;border-radius:8px;padding:0 4px;margin-right:auto;">3</span></div>
+      </div>
+      <!-- Main -->
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <div class="m-topbar"><div><h2>Dashboard</h2><div class="sub">RAVIN Academy · Operations Intelligence</div></div><div style="display:flex;gap:6px;align-items:center;"><div style="background:var(--gold);color:#0A0A0A;padding:4px 10px;border-radius:6px;font-size:9px;font-weight:700;">+ Report</div><div style="border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--sub);position:relative;">◎<span style="position:absolute;top:-3px;left:-3px;background:var(--red);color:#fff;font-size:7px;border-radius:8px;padding:0 3px;">3</span></div></div></div>
+        <div class="m-content">
+          <!-- AI Brief -->
+          <div style="background:rgba(9,9,11,0.95);border-radius:10px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--gb);position:relative;">
+            <div style="font-size:9px;font-weight:800;color:var(--gold);letter-spacing:0.12em;margin-bottom:8px;">✦ RAVIN ACADEMY · AI BRIEF</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:9px;color:rgba(255,255,255,0.5);padding:4px 8px;background:var(--rs);border-radius:5px;border:1px solid rgba(208,69,69,0.15);">🔴 شبرا — compliance تحت 70% لتالت يوم</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.5);padding:4px 8px;background:var(--as);border-radius:5px;">🟡 الزقازيق — مبعتش تقرير النهاردة</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.5);padding:4px 8px;background:rgba(255,255,255,0.02);border-radius:5px;">✅ مول العربية — أعلى compliance</div>
+            </div>
+            <div class="pointer" style="top:6px;left:6px;"><div class="pointer-dot">A</div></div>
+          </div>
+          <!-- KPIs -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;position:relative;">
+            <div class="m-kpi"><span class="val" style="color:var(--gold);">7</span><span class="lbl">Reports</span></div>
+            <div class="m-kpi"><span class="val" style="color:var(--green);">82%</span><span class="lbl">Compliance</span></div>
+            <div class="m-kpi"><span class="val" style="color:var(--red);">3</span><span class="lbl">Missing</span></div>
+            <div class="m-kpi"><span class="val" style="color:var(--blue);">5</span><span class="lbl">Tasks</span></div>
+            <div class="m-kpi"><span class="val" style="color:var(--gold);">10</span><span class="lbl">Stores</span></div>
+            <div class="pointer" style="top:-4px;right:-4px;"><div class="pointer-dot">B</div></div>
+          </div>
+          <!-- Branch Health -->
+          <div style="font-size:9px;font-weight:700;color:var(--sub);margin-bottom:6px;">STORE HEALTH</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;position:relative;">
+            <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;min-width:120px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:700;color:var(--txt);">مول العربية</span><span style="font-size:9px;">☀️</span></div>
+              <div style="display:flex;gap:4px;"><span style="font-size:8px;color:var(--green);font-weight:700;">94%</span><span style="font-size:8px;color:var(--gold);">92%</span></div>
+              <div style="height:2px;background:var(--bd);border-radius:1px;margin-top:4px;"><div style="width:94%;height:100%;background:var(--green);border-radius:1px;"></div></div>
+            </div>
+            <div style="background:var(--card);border:1px solid rgba(208,69,69,0.2);border-radius:8px;padding:8px 10px;min-width:120px;box-shadow:0 0 12px var(--rs);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:700;color:var(--txt);">شبرا</span><span style="font-size:9px;">⛈️</span></div>
+              <div style="display:flex;gap:4px;"><span style="font-size:8px;color:var(--red);font-weight:700;">52%</span><span style="font-size:8px;color:var(--red);">61%</span></div>
+              <div style="height:2px;background:var(--bd);border-radius:1px;margin-top:4px;"><div style="width:52%;height:100%;background:var(--red);border-radius:1px;"></div></div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;min-width:120px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:700;color:var(--txt);">المعادي</span><span style="font-size:9px;">⛅</span></div>
+              <div style="display:flex;gap:4px;"><span style="font-size:8px;color:var(--amber);font-weight:700;">72%</span><span style="font-size:8px;color:var(--gold);">78%</span></div>
+              <div style="height:2px;background:var(--bd);border-radius:1px;margin-top:4px;"><div style="width:72%;height:100%;background:var(--amber);border-radius:1px;"></div></div>
+            </div>
+            <div class="pointer" style="top:-4px;right:-4px;"><div class="pointer-dot">C</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">A</span><p><span class="bold">AI Morning Brief</span> — ملخص ذكي بيتعمل تلقائي كل يوم الصبح. بيقولك أهم المشاكل والإنجازات. التنبيهات الحمرا = عاجل، الصفرا = خلّي بالك، الخضرا = أخبار حلوة.</p></div>
+  <div class="anno-box"><span class="anno-num">B</span><p><span class="bold">كروت الـ KPIs</span> — أرقام سريعة: كام تقرير اتبعت، نسبة الـ compliance، كام تقرير ناقص، كام مهمة مفتوحة. <span class="bold">كل كارت بيتضغط</span> وبيوديك للصفحة التفصيلية.</p></div>
+  <div class="anno-box"><span class="anno-num">C</span><p><span class="bold">صحة الفروع</span> — كل فرع ليه كارت فيه Health Score ورمز الحالة (☀️ تمام / ⛅ محتاج متابعة / 🌧️ خطر / ⛈️ أزمة). الفرع الأحمر اللي بيلمع = في مشكلة كبيرة. <span class="bold">دوس عليه</span> يفتحلك كل التفاصيل.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 3. CREATE REPORT -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header"><span class="section-num">3</span><h2>إنشاء تقرير جديد</h2></div>
+  <div class="section-desc">أهم حاجة بتعملها كل يوم — تقرير العمليات اليومي</div>
+
+  <!-- Step 1: Header -->
+  <div style="font-size:14px;font-weight:800;color:var(--gold);margin:20px 0 8px;">الخطوة ① — بيانات التقرير</div>
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">New Report</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <!-- Sticky compliance bar -->
+      <div style="background:rgba(9,9,11,0.97);border-bottom:1px solid var(--bd);padding:10px 0;margin-bottom:14px;display:flex;align-items:center;gap:14px;position:relative;">
+        <svg width="40" height="40" style="transform:rotate(-90deg);"><circle cx="20" cy="20" r="17" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--amber)" stroke-width="4" stroke-dasharray="53 107" stroke-linecap="round"/></svg>
+        <div><div style="font-size:16px;font-weight:900;color:var(--amber);">48%</div><div style="font-size:7px;color:var(--mut);">Compliance</div></div>
+        <div style="display:flex;gap:12px;">
+          <div style="text-align:center;"><div style="font-size:12px;font-weight:700;color:var(--green);">12</div><div style="font-size:6px;color:var(--mut);">DONE</div></div>
+          <div style="text-align:center;"><div style="font-size:12px;font-weight:700;color:var(--amber);">3</div><div style="font-size:6px;color:var(--mut);">FOLLOW</div></div>
+          <div style="text-align:center;"><div style="font-size:12px;font-weight:700;color:var(--red);">5</div><div style="font-size:6px;color:var(--mut);">NOT</div></div>
+          <div style="text-align:center;"><div style="font-size:12px;font-weight:700;color:var(--mut);">28</div><div style="font-size:6px;color:var(--mut);">LEFT</div></div>
+        </div>
+        <div style="margin-right:auto;background:var(--gold);color:#0A0A0A;padding:6px 14px;border-radius:7px;font-size:10px;font-weight:800;">Submit →</div>
+        <div class="pointer" style="top:-8px;right:-4px;"><div class="pointer-dot">1</div></div>
+      </div>
+      <!-- Header form -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:10px;position:relative;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div><div style="font-size:7px;font-weight:700;color:var(--mut);margin-bottom:4px;">BRANCH</div><div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:10px;color:var(--sub);">مول العربية ▾</div></div>
+          <div><div style="font-size:7px;font-weight:700;color:var(--mut);margin-bottom:4px;">SHIFT</div><div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:10px;color:var(--sub);">Opening ▾</div></div>
+          <div><div style="font-size:7px;font-weight:700;color:var(--mut);margin-bottom:4px;">NOTES</div><div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:10px;color:var(--mut);">ملاحظات...</div></div>
+        </div>
+        <div class="pointer" style="top:-8px;left:-4px;"><div class="pointer-dot">2</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="anno-box"><span class="anno-num">1</span><p><span class="bold">شريط الـ Compliance الثابت</span> — ده بيفضل ظاهر وانت بتنزل. بيحسبلك النسبة لحظيًا مع كل بند بتعلّمه. الدايرة الملونة بتتغير (أخضر/أصفر/أحمر) حسب النسبة.</p></div>
+  <div class="anno-box"><span class="anno-num">2</span><p>اختار <span class="bold">الفرع</span> + <span class="bold">الوردية</span> (Opening / Mid / Closing / Full Day) + اكتب أي <span class="bold">ملاحظات</span>.</p></div>
+
+  <!-- Step 2: Checklist -->
+  <div style="font-size:14px;font-weight:800;color:var(--gold);margin:24px 0 8px;">الخطوة ② — تعبئة الـ Checklist</div>
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Checklist Section</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:0;">
+      <!-- Section header -->
+      <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);position:relative;">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🏪</span><div><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);">Opening Operations</div><div style="font-size:8px;color:var(--mut);">4/9 done</div></div></div>
+        <div style="display:flex;align-items:center;gap:8px;"><div style="width:50px;height:3px;background:var(--bd);border-radius:2px;overflow:hidden;"><div style="width:44%;height:100%;background:var(--gold);border-radius:2px;"></div></div><span style="font-size:12px;color:var(--mut);">⌄</span></div>
+        <div class="pointer" style="top:-6px;left:-6px;"><div class="pointer-dot">3</div></div>
+      </div>
+      <!-- Checklist items -->
+      <div style="border-top:1px solid var(--bd);">
+        <div class="m-check" style="background:rgba(52,160,108,0.04);">
+          <div class="m-check-box m-check-done">✓</div>
+          <span style="color:var(--txt);flex:1;">المحل فتح في الوقت</span>
+          <span class="m-chip" style="background:var(--gns);color:var(--green);">✓ Done</span>
+        </div>
+        <div class="m-check" style="background:rgba(196,127,26,0.04);">
+          <div class="m-check-box m-check-follow">⚡</div>
+          <span style="color:var(--txt);flex:1;">الإضاءة اتشيكت</span>
+          <span class="m-chip" style="background:var(--as);color:var(--amber);">⚡ Follow</span>
+        </div>
+        <div class="m-check" style="background:rgba(208,69,69,0.04);position:relative;">
+          <div class="m-check-box m-check-not">✕</div>
+          <span style="color:var(--txt);flex:1;">التكييف شغال</span>
+          <span class="m-chip" style="background:var(--rs);color:var(--red);">✕ Not Done</span>
+          <div class="pointer" style="top:-6px;left:-6px;"><div class="pointer-dot">4</div></div>
+        </div>
+        <div class="m-check">
+          <div class="m-check-box m-check-empty"></div>
+          <span style="flex:1;">النظافة خلصت</span>
+        </div>
+        <div class="m-check">
+          <div class="m-check-box m-check-empty"></div>
+          <span style="flex:1;">الفاترينة اتشيكت</span>
+        </div>
+      </div>
+      <!-- Buttons row -->
+      <div style="padding:10px 16px;border-top:1px solid var(--bd);display:flex;gap:4px;position:relative;">
+        <div style="background:var(--gns);border:1px solid rgba(52,160,108,0.3);border-radius:5px;padding:3px 8px;font-size:8px;font-weight:700;color:var(--green);">✓ Done</div>
+        <div style="background:var(--as);border:1px solid rgba(196,127,26,0.3);border-radius:5px;padding:3px 8px;font-size:8px;font-weight:700;color:var(--amber);">⚡ Follow</div>
+        <div style="background:var(--rs);border:1px solid rgba(208,69,69,0.3);border-radius:5px;padding:3px 8px;font-size:8px;font-weight:700;color:var(--red);">✕ Not Done</div>
+        <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:5px;padding:3px 8px;font-size:9px;color:var(--mut);">Note...</div>
+        <div class="pointer" style="top:-6px;left:-6px;"><div class="pointer-dot">5</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="anno-box"><span class="anno-num">3</span><p><span class="bold">رأس القسم</span> — كل قسم بيتفتح ويتقفل. فيه شريط progress صغير بيوريك كام بند خلصت. الأقسام السبعة: Opening / Team / Cashier / Stock / Sales / Admin / Closing.</p></div>
+  <div class="anno-box"><span class="anno-num">4</span><p><span class="bold">كل بند ليه 3 اختيارات:</span><br>
+    🟢 <span class="bold">✓ Done</span> = اتعمل (بيحسب 100%)<br>
+    🟡 <span class="bold">⚡ Follow</span> = محتاج متابعة (بيحسب 50%)<br>
+    🔴 <span class="bold">✕ Not Done</span> = مش اتعمل (بيحسب 0%)<br>
+    البند اللي تسيبه فاضي = مش هيتحسب خالص.</p></div>
+  <div class="anno-box"><span class="anno-num">5</span><p>كل بند جنبه خانة <span class="bold">ملاحظة</span> — تقدر تكتب فيها تعليق مثلاً "التكييف مستنى صيانة من بكرة".</p></div>
+
+  <!-- Step 3: Submit -->
+  <div style="font-size:14px;font-weight:800;color:var(--gold);margin:24px 0 8px;">الخطوة ③ — الإرسال</div>
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Report Submitted</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:40px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:12px;">✅</div>
+      <div style="font-size:16px;font-weight:900;color:var(--txt);margin-bottom:8px;">Report Submitted</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:16px;">Compliance: <span style="color:var(--green);font-weight:700;">94%</span></div>
+      <div style="display:inline-block;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px 32px;">
+        <div style="font-size:32px;font-weight:900;color:var(--green);">94%</div>
+        <span class="m-chip" style="background:var(--gns);color:var(--green);">EXCELLENT</span>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
+        <div style="background:var(--gold);color:#0A0A0A;padding:7px 16px;border-radius:7px;font-size:11px;font-weight:700;">View Reports</div>
+        <div style="background:rgba(255,255,255,0.07);color:var(--txt);padding:7px 16px;border-radius:7px;font-size:11px;font-weight:700;border:1px solid var(--bd);">New Report</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip"><b>💡 إيه اللي بيحصل لما تبعت؟</b><p>التقرير بيتحفظ → الـ compliance بيتحسب تلقائي → المدير بتاعك بياخد إشعار → لو النسبة تحت 70% = AI Alert بيتعمل → الداشبورد بيتحدث → كل ده من غير ما تعمل حاجة تانية!</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 4. REPORT DETAIL + APPROVAL -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header"><span class="section-num">4</span><h2>تفاصيل التقرير والاعتماد</h2></div>
+  <div class="section-desc">لما تدوس على أي تقرير — بتشوف كل التفاصيل وتقدر تعتمده أو ترفضه</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Report Detail</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px 18px;position:relative;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:900;color:var(--txt);margin-bottom:6px;">مول العربية</div>
+            <div style="display:flex;gap:6px;">
+              <span class="m-chip" style="background:var(--bs);color:var(--blue);">SUBMITTED</span>
+              <span class="m-chip" style="background:rgba(255,255,255,0.05);color:var(--sub);">OPENING</span>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <svg width="48" height="48" style="transform:rotate(-90deg);"><circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/><circle cx="24" cy="24" r="20" fill="none" stroke="var(--green)" stroke-width="5" stroke-dasharray="118 126" stroke-linecap="round"/></svg>
+            <div style="font-size:20px;font-weight:900;color:var(--green);margin-top:-36px;position:relative;">94%</div>
+            <div style="font-size:7px;color:var(--mut);margin-top:14px;">COMPLIANCE</div>
+          </div>
+        </div>
+        <!-- Approval buttons -->
+        <div style="display:flex;gap:6px;padding-top:12px;border-top:1px solid var(--bd);flex-wrap:wrap;position:relative;">
+          <div style="background:var(--gold);color:#0A0A0A;padding:6px 12px;border-radius:6px;font-size:10px;font-weight:700;">✓ Approve</div>
+          <div style="background:var(--rs);color:var(--red);padding:6px 12px;border-radius:6px;font-size:10px;font-weight:700;border:1px solid rgba(208,69,69,0.2);">✕ Reject</div>
+          <div style="flex:1;"></div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;font-size:9px;color:var(--mut);min-width:150px;">Comment...</div>
+          <div class="pointer" style="top:-8px;right:-6px;"><div class="pointer-dot">6</div></div>
+        </div>
+      </div>
+      <!-- Checklist answers -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-top:10px;">
+        <div style="padding:10px 14px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;">🏪</span><span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.65);">Opening Operations</span>
+          <span style="font-size:8px;color:var(--mut);margin-right:auto;">8/9</span>
+        </div>
+        <div class="m-check"><span style="flex:1;font-size:10px;color:rgba(255,255,255,0.6);">المحل فتح في الوقت</span><span class="m-chip" style="background:var(--gns);color:var(--green);">COMPLETED</span></div>
+        <div class="m-check"><span style="flex:1;font-size:10px;color:rgba(255,255,255,0.6);">التكييف شغال</span><span style="font-size:9px;color:var(--sub);font-style:italic;margin-left:8px;">مستنى صيانة</span><span class="m-chip" style="background:var(--as);color:var(--amber);">FOLLOW UP</span></div>
+      </div>
+      <!-- Comments -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-top:10px;">
+        <div style="font-size:8px;font-weight:700;color:var(--mut);margin-bottom:8px;">COMMENTS</div>
+        <div style="display:flex;gap:6px;"><div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:9px;color:var(--mut);">Add comment...</div><div style="background:var(--gold);color:#0A0A0A;padding:6px 10px;border-radius:6px;font-size:9px;font-weight:700;">Send</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">6</span><p><span class="bold">أزرار الاعتماد</span> — لو انت Admin أو Area Manager، هتلاقي زراير Approve (اعتمد) و Reject (ارفض). تقدر تكتب تعليق قبل ما تعتمد. لما تعتمد أو ترفض — اللي بعت التقرير <span class="bold">بياخد إشعار تلقائي</span>.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 5. TASKS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header"><span class="section-num">5</span><h2>إدارة المهام</h2></div>
+  <div class="section-desc">مهام يومية، أسبوعية، حملات، طوارئ — كلها في مكان واحد</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Tasks</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;"><div style="background:var(--gold);color:#0A0A0A;padding:5px 12px;border-radius:6px;font-size:10px;font-weight:700;">+ New Task</div></div>
+      <!-- Task cards -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:6px;border-right:2px solid var(--red);position:relative;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:10px;font-weight:700;color:var(--txt);">VM Fall Window — مول العربية</span><span class="m-chip" style="background:var(--rs);color:var(--red);">OVERDUE</span><span class="m-chip" style="background:rgba(208,69,69,0.1);color:var(--red);">CRITICAL</span></div>
+            <div style="font-size:8px;color:var(--sub);">📍 مول العربية · 🕐 Today 18:00</div></div>
+          <span class="m-chip" style="background:var(--bs);color:var(--blue);">IN PROGRESS</span>
+        </div>
+        <div class="pointer" style="top:-6px;left:-6px;"><div class="pointer-dot">7</div></div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:6px;border-right:2px solid var(--amber);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div><div style="font-size:10px;font-weight:700;color:var(--txt);margin-bottom:4px;">Replenishment — Women Outerwear</div>
+            <div style="font-size:8px;color:var(--sub);">📍 شبرا · 🕐 Today 20:00</div></div>
+          <span class="m-chip" style="background:rgba(255,255,255,0.05);color:var(--sub);">PENDING</span>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;border-right:2px solid var(--blue);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div><div style="font-size:10px;font-weight:700;color:var(--txt);margin-bottom:4px;">Staff KPI Briefing</div>
+            <div style="font-size:8px;color:var(--sub);">📍 حدائق الأهرام · 🕐 Tomorrow</div></div>
+          <span class="m-chip" style="background:var(--gns);color:var(--green);">DONE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">7</span><p><span class="bold">كل مهمة فيها:</span> عنوان + الفرع + الأولوية (Critical بالأحمر / High بالبرتقالي / Medium بالأزرق) + تاريخ الاستحقاق + الحالة. لو المهمة فاتت الـ deadline بتبقى <span class="bold">OVERDUE</span> بشكل تلقائي وبيتبعت إشعار.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 6. INCIDENTS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header"><span class="section-num">6</span><h2>الإبلاغ عن مشكلة</h2></div>
+  <div class="section-desc">POS واقع؟ تكييف باظ؟ عميل زعلان؟ بلّغ هنا</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Report Incident</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px 18px;">
+        <div style="font-size:14px;font-weight:800;color:var(--txt);margin-bottom:14px;">Report Incident</div>
+        <div style="margin-bottom:10px;"><div style="font-size:7px;font-weight:700;color:var(--mut);margin-bottom:4px;">TITLE</div><div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:10px;color:var(--txt);">POS Terminal 2 مش شغال</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div><div style="font-size:7px;font-weight:700;color:var(--mut);margin-bottom:4px;">BRANCH</div><div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:9px;color:var(--sub);">شبرا ▾</div></div>
+          <div><div style="font-size:7px;font-weight:700;color:var(--mut);margin-bottom:4px;">TYPE</div><div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:9px;color:var(--sub);">POS Issue ▾</div></div>
+          <div><div style="font-size:7px;font-weight:700;color:var(--mut);margin-bottom:4px;">SEVERITY</div><div style="background:rgba(255,255,255,0.04);border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:9px;color:var(--red);font-weight:700;">critical ▾</div></div>
+        </div>
+        <div style="padding:8px 10px;border-radius:7px;background:var(--rs);border:1px solid rgba(208,69,69,0.2);font-size:8px;color:var(--red);font-weight:600;margin-bottom:10px;">⚠ Critical incidents auto-generate emergency tasks</div>
+        <div style="background:var(--gold);color:#0A0A0A;padding:7px 14px;border-radius:7px;font-size:10px;font-weight:800;display:inline-block;">Report →</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn"><b>⚠ لما تختار Critical</b><p>النظام <span style="color:var(--red);font-weight:700;">تلقائيًا</span> بيعمل مهمة طوارئ وبيبعت إشعار لكل المديرين! يعني مش محتاج تعمل مهمة لوحدك — النظام بيعملها.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 7. BRANCH TWIN -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header"><span class="section-num">7</span><h2>التوأم الرقمي للفرع</h2></div>
+  <div class="section-desc">لما تدوس على أي فرع — بيفتحلك صفحة فيها كل حاجة عنه</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Branch Twin — مول العربية</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <!-- Header -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+          <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-size:18px;">☀️</span><span style="font-size:16px;font-weight:900;color:var(--txt);">مول العربية</span></div>
+            <div style="display:flex;gap:4px;"><span class="m-chip" style="background:var(--gns);color:var(--green);">HEALTHY</span><span class="m-chip" style="background:var(--gs);color:var(--gold);">Cairo</span></div></div>
+          <div style="text-align:center;"><svg width="44" height="44" style="transform:rotate(-90deg);"><circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/><circle cx="22" cy="22" r="18" fill="none" stroke="var(--green)" stroke-width="4" stroke-dasharray="106 113" stroke-linecap="round"/></svg><div style="font-size:18px;font-weight:900;color:var(--green);margin-top:-32px;position:relative;">94%</div><div style="font-size:7px;color:var(--mut);margin-top:12px;">Health</div></div>
+        </div>
+        <!-- KPIs -->
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          <div class="m-kpi" style="padding:6px 10px;"><span class="val" style="font-size:13px;">94%</span><span class="lbl">Comp</span></div>
+          <div class="m-kpi" style="padding:6px 10px;"><span class="val" style="font-size:13px;">2</span><span class="lbl">Reports</span></div>
+          <div class="m-kpi" style="padding:6px 10px;"><span class="val" style="font-size:13px;">3/4</span><span class="lbl">Tasks</span></div>
+          <div class="m-kpi" style="padding:6px 10px;"><span class="val" style="font-size:13px;">0</span><span class="lbl">Incidents</span></div>
+          <div class="m-kpi" style="padding:6px 10px;"><span class="val" style="font-size:13px;">5</span><span class="lbl">Staff</span></div>
+        </div>
+      </div>
+      <!-- Tabs -->
+      <div style="display:flex;gap:3px;margin-bottom:10px;position:relative;">
+        <div style="padding:5px 12px;border-radius:5px;background:var(--gs);color:var(--gold);font-size:9px;font-weight:700;border-bottom:2px solid var(--gold);">Overview</div>
+        <div style="padding:5px 12px;border-radius:5px;font-size:9px;color:var(--sub);">Reports</div>
+        <div style="padding:5px 12px;border-radius:5px;font-size:9px;color:var(--sub);">Tasks</div>
+        <div style="padding:5px 12px;border-radius:5px;font-size:9px;color:var(--sub);">Staff</div>
+        <div style="padding:5px 12px;border-radius:5px;font-size:9px;color:var(--sub);">Timeline</div>
+        <div style="padding:5px 12px;border-radius:5px;font-size:9px;color:var(--sub);">AI</div>
+        <div class="pointer" style="top:-8px;left:-6px;"><div class="pointer-dot">8</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">8</span><p><span class="bold">6 تابات:</span><br>
+    🔹 <span class="bold">Overview</span> = ملخص الأداء العام<br>
+    🔹 <span class="bold">Reports</span> = كل التقارير اللي اتبعتت من الفرع<br>
+    🔹 <span class="bold">Tasks</span> = كل المهام<br>
+    🔹 <span class="bold">Staff</span> = الموظفين (دوس على حد يفتحلك ملفه)<br>
+    🔹 <span class="bold">Timeline</span> = كل الأحداث بالترتيب الزمني<br>
+    🔹 <span class="bold">AI</span> = تحليل ذكي خاص بالفرع ده — بيتغير حسب الحالة</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 8. EMPLOYEE + AI COACHING -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-header"><span class="section-num">8</span><h2>ملف الموظف + AI Coaching</h2></div>
+  <div class="section-desc">كل موظف ليه ملف فيه أداؤه + الـ AI بيعملّه خطة تدريب مخصصة</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Employee Profile</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#8B6A3A);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0A0A0A;">YH</div>
+          <div><div style="font-size:14px;font-weight:800;color:var(--txt);">ياسمين حسن</div><div style="font-size:9px;color:var(--sub);">مول العربية · Sales</div><span class="m-chip" style="background:var(--gs);color:var(--gold);">RANK #1</span></div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          <div class="m-kpi" style="padding:6px 8px;"><span class="val" style="font-size:12px;color:var(--gold);">125K</span><span class="lbl">MTD Sales</span></div>
+          <div class="m-kpi" style="padding:6px 8px;"><span class="val" style="font-size:12px;">3.2</span><span class="lbl">UPT</span></div>
+          <div class="m-kpi" style="padding:6px 8px;"><span class="val" style="font-size:12px;">512</span><span class="lbl">ATV</span></div>
+          <div class="m-kpi" style="padding:6px 8px;"><span class="val" style="font-size:12px;color:var(--green);">38%</span><span class="lbl">Conv</span></div>
+          <div class="m-kpi" style="padding:6px 8px;"><span class="val" style="font-size:12px;color:var(--green);">96%</span><span class="lbl">Score</span></div>
+        </div>
+      </div>
+      <!-- AI Coaching -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;position:relative;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:0.08em;">✦ AI COACHING</div>
+          <div style="background:var(--gold);color:#0A0A0A;padding:4px 10px;border-radius:6px;font-size:9px;font-weight:700;">Generate Coaching Plan</div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);line-height:2;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;border-right:3px solid var(--green);">
+          ✅ ياسمين أداؤها ممتاز — UPT الأعلى في الشركة (3.2). اقترح إنها تبقى mentor لأحمد رامي اللي UPT بتاعه ضعيف. كمان تقدر تاخد training "Leadership Program" عشان تتأهل لمنصب Team Lead.
+        </div>
+        <div class="pointer" style="top:-8px;left:-6px;"><div class="pointer-dot">9</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">9</span><p><span class="bold">AI Coaching</span> — دوس على "Generate Coaching Plan" والـ Claude AI هيحلل أداء الموظف (مبيعات، UPT، حضور، مهام) وهيديك <span class="bold">توصيات تدريبية مخصصة</span> ليه!</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 9. VM ACADEMY -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-header"><span class="section-num">9</span><h2>VM Academy</h2></div>
+  <div class="section-desc">تقارير Visual Merchandising مع صور قبل/بعد وسكورات</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">VM Academy</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <!-- VM Report card -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <div><div style="font-size:11px;font-weight:700;color:var(--txt);margin-bottom:4px;">Fall Window — مول العربية</div><div style="font-size:8px;color:var(--sub);">📅 Today · 📷 3 photos</div></div>
+          <div style="text-align:center;"><div style="font-size:16px;font-weight:800;color:var(--green);">92</div><div style="font-size:7px;color:var(--mut);">SCORE</div></div>
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:8px;">
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.03);border-radius:5px;padding:4px;"><div style="font-size:10px;font-weight:700;color:var(--green);">95</div><div style="font-size:6px;color:var(--mut);">WINDOW</div></div>
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.03);border-radius:5px;padding:4px;"><div style="font-size:10px;font-weight:700;color:var(--green);">90</div><div style="font-size:6px;color:var(--mut);">MANNEQUIN</div></div>
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.03);border-radius:5px;padding:4px;"><div style="font-size:10px;font-weight:700;color:var(--amber);">85</div><div style="font-size:6px;color:var(--mut);">FOLDING</div></div>
+          <div style="flex:1;text-align:center;background:rgba(255,255,255,0.03);border-radius:5px;padding:4px;"><div style="font-size:10px;font-weight:700;color:var(--green);">98</div><div style="font-size:6px;color:var(--mut);">PROMO</div></div>
+        </div>
+        <!-- Before/After -->
+        <div style="display:flex;gap:4px;position:relative;">
+          <div style="flex:1;height:60px;background:rgba(255,255,255,0.03);border:1px solid var(--bd);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--mut);font-weight:600;">📷 BEFORE</div>
+          <div style="flex:1;height:60px;background:rgba(255,255,255,0.06);border:1px solid var(--bd);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--sub);font-weight:600;">📷 AFTER</div>
+          <div class="pointer" style="top:-8px;left:-6px;"><div class="pointer-dot">10</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">10</span><p><span class="bold">صور Before/After</span> — بترفع صورة "قبل" التنفيذ وصورة "بعد" التنفيذ. الصور بتتحفظ على Supabase Storage وبتظهر في التقرير. الـ 4 معايير (Window, Mannequin, Folding, Promo) بتتقيّم من 0-100 والمتوسط = الـ Overall Score.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 10. CX READINESS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="section-header"><span class="section-num">10</span><h2>تقييم جاهزية المتجر</h2></div>
+  <div class="section-desc">8 بنود — هل المحل جاهز يستقبل عملاء ولا لأ؟</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">CX Readiness</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <!-- Checked items -->
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:var(--gns);border:1px solid rgba(52,160,108,0.2);cursor:pointer;">
+            <div style="width:16px;height:16px;border-radius:4px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:900;">✓</div>
+            <div><div style="font-size:10px;font-weight:600;color:var(--txt);">💡 Lighting</div><div style="font-size:7px;color:var(--mut);">إضاءة مناسبة</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:var(--gns);border:1px solid rgba(52,160,108,0.2);">
+            <div style="width:16px;height:16px;border-radius:4px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:900;">✓</div>
+            <div><div style="font-size:10px;font-weight:600;color:var(--txt);">🎵 Music</div><div style="font-size:7px;color:var(--mut);">موسيقى شغالة</div></div>
+          </div>
+          <!-- Unchecked -->
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:rgba(255,255,255,0.02);border:1px solid var(--bd);">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--bd);"></div>
+            <div><div style="font-size:10px;font-weight:600;color:var(--sub);">♨️ Steaming</div><div style="font-size:7px;color:var(--mut);">هدوم مكوية</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:rgba(255,255,255,0.02);border:1px solid var(--bd);">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--bd);"></div>
+            <div><div style="font-size:10px;font-weight:600;color:var(--sub);">🌸 Scent</div><div style="font-size:7px;color:var(--mut);">ريحة المحل</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">✓</span><p>كل بند <span class="bold">بيتضغط</span> — لما تدوس عليه بيبقى أخضر (✓). الـ Readiness Score = عدد اللي اتعلّم ÷ 8 × 100. بعد ما تخلص، دوس "Submit Assessment" — النتيجة بتتحفظ في الداتابيز.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 11. WAR ROOM -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s11">
+  <div class="section-header"><span class="section-num">11</span><h2>غرفة العمليات</h2></div>
+  <div class="section-desc">شاشة مراقبة حية — كل الفروع في نظرة واحدة</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">War Room</span></div>
+    <div class="screen-body" style="background:rgba(9,9,11,0.98);padding:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);"></div>
+          <span style="font-size:12px;font-weight:900;color:var(--txt);">OPERATIONS WAR ROOM</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green);"></div><span style="font-size:8px;color:var(--green);font-weight:700;">LIVE</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div style="padding:8px 10px;border-radius:8px;background:var(--gns);border:1px solid rgba(52,160,108,0.2);">
+          <div style="font-size:9px;font-weight:700;color:var(--txt);margin-bottom:4px;">مول العربية ☀️</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;font-size:8px;">
+            <div><span style="color:var(--mut);">Health</span> <span style="color:var(--green);font-weight:700;">94%</span></div>
+            <div><span style="color:var(--mut);">Comp</span> <span style="color:var(--gold);font-weight:700;">92%</span></div>
+          </div>
+        </div>
+        <div style="padding:8px 10px;border-radius:8px;background:var(--rs);border:1px solid rgba(208,69,69,0.25);box-shadow:0 0 12px var(--rs);">
+          <div style="font-size:9px;font-weight:700;color:var(--txt);margin-bottom:4px;">شبرا ⛈️</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;font-size:8px;">
+            <div><span style="color:var(--mut);">Health</span> <span style="color:var(--red);font-weight:700;">48%</span></div>
+            <div><span style="color:var(--mut);">Issues</span> <span style="color:var(--red);font-weight:700;">3</span></div>
+          </div>
+          <div style="margin-top:4px;padding:2px 4px;border-radius:3px;background:rgba(208,69,69,0.15);font-size:7px;color:var(--red);font-weight:700;text-align:center;">⚡ ACTION REQUIRED</div>
+        </div>
+        <div style="padding:8px 10px;border-radius:8px;background:var(--as);border:1px solid rgba(196,127,26,0.15);">
+          <div style="font-size:9px;font-weight:700;color:var(--txt);margin-bottom:4px;">المعادي ⛅</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;font-size:8px;">
+            <div><span style="color:var(--mut);">Health</span> <span style="color:var(--amber);font-weight:700;">72%</span></div>
+            <div><span style="color:var(--mut);">Comp</span> <span style="color:var(--gold);font-weight:700;">78%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip"><b>💡 War Room</b><p>الشاشة دي مثالية تتحط على تليفزيون كبير في المكتب. الفرع الأحمر اللي بيلمع = فيه مشكلة كبيرة ومحتاج تدخل فوري. الأخضر = تمام. الأصفر = خلّي بالك.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 12. AI INSIGHTS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s12">
+  <div class="section-header"><span class="section-num">12</span><h2>الذكاء الاصطناعي</h2></div>
+  <div class="section-desc">اسأل الـ AI أي سؤال وهو هيحلل بيانات فروعك الحقيقية</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">AI Insights</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;border:1px solid var(--gb);box-shadow:0 0 20px var(--gs);">
+        <div style="font-size:10px;font-weight:900;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px;">✦ RAVIN ACADEMY · AI</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--gb);border-radius:7px;padding:7px 10px;font-size:10px;color:var(--sub);">أنهي فرع محتاج تدخل فوري؟</div>
+          <div style="background:var(--gold);color:#0A0A0A;padding:7px 14px;border-radius:7px;font-size:10px;font-weight:800;">Ask →</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          <div style="font-size:8px;padding:3px 8px;border-radius:12px;border:1px solid var(--gb);background:var(--gs);color:var(--sub);">Top risks?</div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:12px;border:1px solid var(--gb);background:var(--gs);color:var(--sub);">Store tips?</div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:12px;border:1px solid var(--gb);background:var(--gs);color:var(--sub);">Improvements?</div>
+        </div>
+      </div>
+      <!-- AI Response -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-top:10px;">
+        <div style="font-size:9px;font-weight:700;color:var(--gold);margin-bottom:8px;">✦ ANALYSIS</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);line-height:2;">
+          فرع شبرا محتاج تدخل فوري — compliance 61% لتالت يوم على التوالي. الأسباب: مشاكل POS + نقص موظفين. التوصية: بعت Area Manager يعمل زيارة ميدانية النهاردة وراجع الـ schedule.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">✦</span><p>اكتب سؤالك بالعربي أو بالإنجليزي واضغط Ask — الـ <span class="bold">Claude AI</span> هيرد بتحليل مبني على بيانات فروعك الحقيقية. فيه أسئلة جاهزة تقدر تدوس عليها مباشرة.</p></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- 13. NOTIFICATIONS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="s13">
+  <div class="section-header"><span class="section-num">13</span><h2>الإشعارات</h2></div>
+  <div class="section-desc">كل حاجة مهمة بتحصل في النظام — هتلاقيها هنا</div>
+
+  <div class="screen">
+    <div class="screen-bar"><div class="screen-dot screen-dot-r"></div><div class="screen-dot screen-dot-y"></div><div class="screen-dot screen-dot-g"></div><span class="screen-title">Notifications</span></div>
+    <div class="screen-body" style="background:var(--bg);padding:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span style="font-size:10px;color:var(--sub);">3 unread</span><span style="font-size:9px;color:var(--sub);">Mark all read</span></div>
+      <!-- Notif items -->
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:5px;border-right:2px solid var(--red);">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:10px;font-weight:700;color:var(--txt);">🔴 Compliance Critical</span><span style="font-size:8px;color:var(--mut);">18m</span></div>
+        <div style="font-size:9px;color:var(--sub);margin-top:3px;">شبرا compliance 61% — تحت الحد الأدنى</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:5px;border-right:2px solid var(--amber);">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:10px;font-weight:700;color:var(--txt);">🟡 Task Overdue</span><span style="font-size:8px;color:var(--mut);">1h</span></div>
+        <div style="font-size:9px;color:var(--sub);margin-top:3px;">POS Audit — الإسكندرية فات الميعاد</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;border-right:2px solid var(--green);opacity:0.6;">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:10px;color:var(--sub);">✅ Report Approved</span><span style="font-size:8px;color:var(--mut);">2h</span></div>
+        <div style="font-size:9px;color:var(--mut);margin-top:3px;">مول العربية — Opening Shift approved</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box"><span class="anno-num">🔔</span><p>الإشعارات بتتعمل <span class="bold">تلقائي</span> — ما محتاجش تعمل حاجة. كل 15 ثانية النظام بيشيك لو فيه إشعارات جديدة. الإشعارات اللي مقريتهاش بتكون <span class="bold">ساطعة</span> — لما تدوس عليها بتبقى باهتة.</p></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section">
+  <div class="section-header"><span class="section-num">✓</span><h2>ملخص سريع</h2></div>
+  
+  <div class="guide-tbl">
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><th style="padding:10px 14px;text-align:right;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bd);color:var(--mut);font-size:10px;">الصفحة</th><th style="padding:10px 14px;text-align:right;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--bd);color:var(--mut);font-size:10px;">هتعمل فيها إيه</th></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Dashboard</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تشوف ملخص كل حاجة — KPIs + AI Brief + صحة الفروع</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">New Report</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تبعت تقرير العمليات اليومي — 7 أقسام + KPIs + صور</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Report Detail</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تشوف تفاصيل التقرير + تعتمده أو ترفضه</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Tasks</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تعمل مهام + تتابعها + تشوف المتأخر</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Incidents</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تبلّغ عن مشكلة (POS, تكييف, شكوى)</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Branch Twin</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تشوف كل حاجة عن فرع معين (6 تابات)</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Employees</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">ملفات الموظفين + AI Coaching</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">VM Academy</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تقارير VM + صور before/after + scores</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">CX Readiness</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">تقييم جاهزية المتجر (8 بنود)</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">War Room</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">مراقبة حية لكل الفروع</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">AI Insights</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">اسأل الذكاء الاصطناعي أي سؤال</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Notifications</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">كل الإشعارات التلقائية</td></tr>
+      <tr><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--txt);font-weight:700;">Sales & Targets</td><td style="padding:8px 14px;border-bottom:1px solid var(--bd);color:var(--sub);">متابعة المبيعات والتارجت الشهري</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  <div style="font-size:20px;font-weight:900;letter-spacing:0.1em;">RAVIN <span style="color:var(--gold);">ACADEMY</span></div>
+  <div style="font-size:9px;color:var(--mut);letter-spacing:0.2em;margin-top:4px;">MAKE UR WORLD TO BE PROUD</div>
+  <div style="font-size:11px;color:var(--mut);margin-top:16px;">الدليل المصوّر الكامل · النسخة 1.0 · 2024</div>
+</div>
+
+</div>
+</body>
+</html>
