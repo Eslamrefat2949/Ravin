@@ -79,9 +79,21 @@ function AP({children}){
 const[u,sU]=useState(null);const[p,sP]=useState(null);const[br,sBr]=useState([]);const[rdy,sR]=useState(false);
 const[sRole,setSRS]=useState(()=>{try{return sessionStorage.getItem("sb_role")||null;}catch{return null;}});
 const bm=Object.fromEntries(br.map(b=>[b.id,b.name]));
-useEffect(()=>{(async()=>{const user=await sb.getUser();if(user){sU(user);try{const[pr]=await sb.q("profiles",{qs:`id=eq.${user.id}`});sP(pr);}catch{}try{sBr(await sb.q("branches",{qs:"is_active=eq.true&order=name"})||[]);}catch{}}sR(true);})();},[]);
-const login=async(em,pw)=>{const d=await sb.signIn(em,pw);sU(d.user);try{const[pr]=await sb.q("profiles",{qs:`id=eq.${d.user.id}`});sP(pr);}catch{}try{sBr(await sb.q("branches",{qs:"is_active=eq.true&order=name"})||[]);}catch{};return d.user;};
-const logout=async()=>{await sb.signOut();sU(null);sP(null);try{sessionStorage.removeItem("sb_role");}catch{}setSRS(null);};
+useEffect(()=>{(async()=>{
+// try refresh first in case token expired
+let user=await sb.getUser();
+if(!user){const ok=await sb.refresh();if(ok)user=await sb.getUser();}
+if(user){sU(user);
+try{const[pr]=await sb.q("profiles",{qs:`id=eq.${user.id}`});sP(pr);}catch{}
+try{sBr(await sb.q("branches",{qs:"is_active=eq.true&order=name"})||[]);}catch{}
+// start auto-refresh
+if(typeof window!=="undefined"){clearInterval(window._ravRefresh);window._ravRefresh=setInterval(()=>sb.refresh(),50*60*1000);}
+}sR(true);})();},[]);
+const login=async(em,pw)=>{const d=await sb.signIn(em,pw);sU(d.user);try{const[pr]=await sb.q("profiles",{qs:`id=eq.${d.user.id}`});sP(pr);}catch{}try{sBr(await sb.q("branches",{qs:"is_active=eq.true&order=name"})||[]);}catch{};
+// start auto-refresh every 50min
+if(typeof window!=="undefined"){clearInterval(window._ravRefresh);window._ravRefresh=setInterval(()=>sb.refresh(),50*60*1000);}
+return d.user;};
+const logout=async()=>{await sb.signOut();sU(null);sP(null);try{sessionStorage.removeItem("sb_role");}catch{}setSRS(null);if(typeof window!=="undefined")clearInterval(window._ravRefresh);};
 const setSessionRole=(r)=>{setSRS(r);try{if(r)sessionStorage.setItem("sb_role",r);else sessionStorage.removeItem("sb_role");}catch{}};
 const effectiveRole=sRole||p?.role;
 return <AC.Provider value={{user:u,profile:p,branches:br,bm,rdy,login,logout,sessionRole:sRole,setSessionRole,effectiveRole}}>{children}</AC.Provider>;}
@@ -129,7 +141,7 @@ return(<div style={{minHeight:"100vh",background:"#F0F4F8",display:"flex",alignI
 // ═══════════════════════════════════════════════════════════════════════
 // SIDEBAR
 // ═══════════════════════════════════════════════════════════════════════
-function Side({pg,setPg,profile:p,nC,effectiveRole:er}){const{logout}=useAuth();
+function Side({pg,setPg,profile:p,nC,effectiveRole:er,sideOpen,setSideOpen}){const{logout}=useAuth();
 const nav=[
   {id:"dash",l:"Dashboard",i:"◈",g:"CORE"},{id:"war",l:"War Room",i:"⬡",g:"CORE"},
   {id:"reports",l:"Reports",i:"◉",g:"OPS"},{id:"new_report",l:"New Report",i:"✚",g:"OPS",hl:1},
@@ -694,20 +706,232 @@ Active
 </div>);}
 
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// MY TEAM — Branch adds employees + enters sales + views performance
+// ═══════════════════════════════════════════════════════════════════════
+function MyTeam(){
+const{profile,bm}=useAuth();const{toast}=useToast();
+const branchId=profile?.branch_id;
+const branchName=bm[branchId]||"Your Branch";
+const isManager=["admin","area_manager","branch_manager"].includes(profile?.effectiveRole||profile?.role);
+const canAdd=isManager;
+
+// Load team + performance
+const{data:team,loading,reload}=useQ("team_performance",
+  branchId?`branch_id=eq.${branchId}&order=mtd_sales.desc`:
+  "order=branch_name,mtd_sales.desc"
+);
+
+// Add employee form
+const[showAdd,setShowAdd]=useState(false);
+const[addForm,setAddForm]=useState({name:"",phone:"",position:"Sales Associate"});
+const[savingAdd,setSavingAdd]=useState(false);
+
+// Daily sales entry
+const[salesDate,setSalesDate]=useState(new Date().toISOString().slice(0,10));
+const[salesRows,setSalesRows]=useState({});
+const[savingSales,setSavingSales]=useState(false);
+const[showSales,setShowSales]=useState(false);
+
+// Target setting
+const[showTargets,setShowTargets]=useState(false);
+const[targetRows,setTargetRows]=useState({});
+const[savingTargets,setSavingTargets]=useState(false);
+
+// Init sales rows when team loads
+useState(()=>{
+  if(team.length){
+    const r={};
+    team.forEach(m=>{if(!salesRows[m.person_id])r[m.person_id]={sales:"",invoices:"",qty:""};});
+    if(Object.keys(r).length)setSalesRows(p=>({...p,...r}));
+  }
+},[team]);
+
+const addEmployee=async()=>{
+  if(!addForm.name.trim()){toast("Enter employee name","error");return;}
+  setSavingAdd(true);
+  try{
+    await sb.rpc("add_staff_member",{
+      p_branch_id:branchId,
+      p_full_name:addForm.name.trim(),
+      p_phone:addForm.phone||null,
+      p_position:addForm.position||"Sales Associate",
+      p_created_by:profile.id
+    });
+    toast(`${addForm.name} added to team!`,"success");
+    setAddForm({name:"",phone:"",position:"Sales Associate"});
+    setShowAdd(false);reload();
+  }catch(e){toast(e.message,"error");}
+  setSavingAdd(false);
+};
+
+const saveDailySales=async()=>{
+  const rows=Object.entries(salesRows).filter(([,v])=>v.sales&&+v.sales>0);
+  if(!rows.length){toast("Enter at least one sales figure","error");return;}
+  setSavingSales(true);
+  let saved=0;
+  for(const[personId,vals] of rows){
+    const member=team.find(m=>m.person_id===personId);
+    if(!member)continue;
+    try{
+      if(member.member_type==="staff"){
+        await sb.rpc("add_staff_daily_sales",{p_staff_id:personId,p_branch_id:branchId,p_date:salesDate,p_sales:+vals.sales,p_invoices:+vals.invoices||0,p_quantity:+vals.qty||0});
+      } else {
+        await sb.rpc("upsert_employee_daily_sales",{p_employee_id:personId,p_branch_id:branchId,p_date:salesDate,p_sales:+vals.sales,p_invoices:+vals.invoices||0,p_quantity:+vals.qty||0});
+      }
+      saved++;
+    }catch(e){toast(`Error for ${member.full_name}: ${e.message}`,"error");}
+  }
+  toast(`${saved} records saved!`,"success");
+  setSalesRows(p=>{const n={...p};rows.forEach(([id])=>{n[id]={sales:"",invoices:"",qty:""};});return n;});
+  setSavingSales(false);reload();
+};
+
+const saveTargets=async()=>{
+  const rows=Object.entries(targetRows).filter(([,v])=>v&&+v>0);
+  if(!rows.length){toast("Enter at least one target","error");return;}
+  setSavingTargets(true);
+  let saved=0;
+  for(const[personId,tgt] of rows){
+    const member=team.find(m=>m.person_id===personId);
+    if(!member)continue;
+    try{
+      if(member.member_type==="staff"){
+        await sb.rpc("set_staff_target",{p_staff_id:personId,p_month:new Date().toISOString().slice(0,7)+"-01",p_target:+tgt,p_created_by:profile.id});
+      } else {
+        await sb.rpc("upsert_employee_target",{p_employee_id:personId,p_month:new Date().toISOString().slice(0,7)+"-01",p_target:+tgt,p_user_id:profile.id});
+      }
+      saved++;
+    }catch(e){toast(`Error for ${member.full_name}: ${e.message}`,"error");}
+  }
+  toast(`${saved} targets saved!`,"success");
+  setShowTargets(false);setSavingTargets(false);reload();
+};
+
+const totalSales=team.reduce((s,m)=>s+(+m.mtd_sales||0),0);
+const totalTarget=team.reduce((s,m)=>s+(+m.monthly_target||0),0);
+const teamAchiev=totalTarget>0?Math.round(totalSales/totalTarget*100):0;
+
+if(loading)return <Ld t="Loading team..."/>;
+
+return(<div>
+{/* Header KPIs */}
+<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(110px,1fr))",gap:8,marginBottom:16}}>
+  {[{l:"Team Members",v:team.length,c:C.blue},{l:"MTD Sales",v:fE(totalSales),c:C.gold},{l:"Team Target",v:fE(totalTarget),c:C.text},{l:"Achievement",v:`${teamAchiev}%`,c:cC(teamAchiev),ring:1,rp:teamAchiev}].map((k,i)=>(<GC key={i} style={{padding:"12px 14px",textAlign:"center"}}><div style={{fontSize:8,color:C.muted,textTransform:"uppercase",marginBottom:5}}>{k.l}</div><div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><div style={{fontSize:16,fontWeight:800,color:k.c}}>{k.v}</div>{k.ring&&<Ring pct={k.rp} sz={28} sw={3} color={k.c}/>}</div></GC>))}
+</div>
+
+{/* Action buttons */}
+{canAdd&&<div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap"}}>
+  <Bt onClick={()=>{setShowAdd(!showAdd);setShowSales(false);setShowTargets(false);}} v={showAdd?"danger":"gold"} sz="md">👤 {showAdd?"Cancel":"Add Employee"}</Bt>
+  <Bt onClick={()=>{setShowSales(!showSales);setShowAdd(false);setShowTargets(false);}} v={showSales?"danger":"default"} sz="md">💰 {showSales?"Cancel":"Enter Today's Sales"}</Bt>
+  <Bt onClick={()=>{setShowTargets(!showTargets);setShowAdd(false);setShowSales(false);}} v={showTargets?"danger":"default"} sz="md">🎯 {showTargets?"Cancel":"Set Monthly Targets"}</Bt>
+</div>}
+
+{/* Add Employee Form */}
+{showAdd&&<GC style={{padding:"18px 22px",marginBottom:14,border:`1px solid ${C.goldB}`}}>
+  <div style={{fontSize:12,fontWeight:800,color:C.text,marginBottom:12}}>Add Team Member</div>
+  <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr auto",gap:10,alignItems:"flex-end"}}>
+    <div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>FULL NAME *</label><input value={addForm.name} onChange={e=>setAddForm(p=>({...p,name:e.target.value}))} placeholder="Employee name..." style={iS}/></div>
+    <div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>PHONE</label><input value={addForm.phone} onChange={e=>setAddForm(p=>({...p,phone:e.target.value}))} placeholder="010..." style={iS}/></div>
+    <div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>POSITION</label><select value={addForm.position} onChange={e=>setAddForm(p=>({...p,position:e.target.value}))} style={iS}><option>Sales Associate</option><option>Senior Sales</option><option>Cashier</option><option>VM Coordinator</option><option>Stock Controller</option></select></div>
+    <Bt onClick={addEmployee} v="gold" sz="lg" disabled={savingAdd}>{savingAdd?"...":"Add →"}</Bt>
+  </div>
+</GC>}
+
+{/* Daily Sales Entry */}
+{showSales&&team.length>0&&<GC style={{padding:"18px 22px",marginBottom:14}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+    <div style={{fontSize:12,fontWeight:800,color:C.text}}>Enter Daily Sales</div>
+    <div style={{display:"flex",alignItems:"center",gap:10}}>
+      <input type="date" value={salesDate} onChange={e=>setSalesDate(e.target.value)} style={{...iS,width:140}}/>
+      <Bt onClick={saveDailySales} v="gold" sz="md" disabled={savingSales}>{savingSales?"Saving...":"Save All →"}</Bt>
+    </div>
+  </div>
+  <div style={{display:"grid",gridTemplateColumns:"1fr",gap:4}}>
+    <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:8,padding:"6px 0"}}>
+      {["Employee","Sales (EGP)","Invoices","Qty"].map(h=>(<div key={h} style={{fontSize:8,fontWeight:700,color:C.muted,textTransform:"uppercase"}}>{h}</div>))}
+    </div>
+    {team.map(m=>(<div key={m.person_id} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:8,padding:"4px 0",borderTop:`1px solid ${C.bd}`,alignItems:"center"}}>
+      <div style={{fontSize:11,fontWeight:600,color:C.text}}>{m.full_name}</div>
+      <input type="number" placeholder="0" value={(salesRows[m.person_id]||{}).sales||""} onChange={e=>setSalesRows(p=>({...p,[m.person_id]:{...(p[m.person_id]||{}),sales:e.target.value}}))} style={{...iS,fontSize:12,fontWeight:700,textAlign:"center"}}/>
+      <input type="number" placeholder="0" value={(salesRows[m.person_id]||{}).invoices||""} onChange={e=>setSalesRows(p=>({...p,[m.person_id]:{...(p[m.person_id]||{}),invoices:e.target.value}}))} style={{...iS,textAlign:"center"}}/>
+      <input type="number" placeholder="0" value={(salesRows[m.person_id]||{}).qty||""} onChange={e=>setSalesRows(p=>({...p,[m.person_id]:{...(p[m.person_id]||{}),qty:e.target.value}}))} style={{...iS,textAlign:"center"}}/>
+    </div>))}
+  </div>
+</GC>}
+
+{/* Set Targets */}
+{showTargets&&team.length>0&&<GC style={{padding:"18px 22px",marginBottom:14}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+    <div><div style={{fontSize:12,fontWeight:800,color:C.text}}>Monthly Targets</div><div style={{fontSize:10,color:C.sub}}>{new Date().toLocaleString("default",{month:"long",year:"numeric"})}</div></div>
+    <Bt onClick={saveTargets} v="gold" sz="md" disabled={savingTargets}>{savingTargets?"Saving...":"Save Targets →"}</Bt>
+  </div>
+  {team.map(m=>(<div key={m.person_id} style={{display:"flex",alignItems:"center",gap:12,padding:"8px 0",borderBottom:`1px solid ${C.bd}`}}>
+    <div style={{flex:1,fontSize:11,fontWeight:600,color:C.text}}>{m.full_name}</div>
+    <div style={{fontSize:10,color:C.muted}}>Current: {fE(m.monthly_target)}</div>
+    <input type="number" placeholder="Target EGP" value={targetRows[m.person_id]||""} onChange={e=>setTargetRows(p=>({...p,[m.person_id]:e.target.value}))} style={{...iS,width:140,textAlign:"center"}}/>
+  </div>))}
+</GC>}
+
+{/* Performance Table */}
+{team.length===0?<Em icon="👥" title="No team members yet" msg="Add your first team member to start tracking performance." action={canAdd?"Add Employee":null} onAction={()=>setShowAdd(true)}/>:
+<GC style={{overflow:"hidden"}}>
+  <div style={{padding:"12px 18px",background:C.blueS,borderBottom:`1px solid ${C.bd}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+    <div style={{fontSize:10,fontWeight:700,color:C.blue}}>TEAM PERFORMANCE — {new Date().toLocaleString("default",{month:"long",year:"numeric"}).toUpperCase()}</div>
+    <div style={{fontSize:9,color:C.muted}}>{team.length} members</div>
+  </div>
+  <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
+    <thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["#","Name","Target","MTD Sales","Remaining","Achievement","UPT","ATV",""].map(h=>(<th key={h} style={{padding:"9px 12px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700,textTransform:"uppercase"}}>{h}</th>))}</tr></thead>
+    <tbody>{team.map((m,i)=>{
+      const ach=+m.achievement_pct||0;
+      return(<tr key={m.person_id} style={{borderBottom:`1px solid ${C.bd}`}}>
+        <td style={{padding:"9px 12px",color:i<3?C.gold:C.muted,fontWeight:700}}>#{i+1}</td>
+        <td style={{padding:"9px 12px"}}><div style={{fontWeight:700,color:C.text}}>{m.full_name}</div><div style={{fontSize:8,color:C.muted,textTransform:"capitalize"}}>{m.position}</div></td>
+        <td style={{padding:"9px 12px",color:C.sub}}>{fE(m.monthly_target)}</td>
+        <td style={{padding:"9px 12px",fontWeight:700,color:C.gold}}>{fE(m.mtd_sales)}</td>
+        <td style={{padding:"9px 12px",color:+m.remaining>0?C.amber:C.green,fontWeight:600}}>{fE(m.remaining)}</td>
+        <td style={{padding:"9px 12px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontWeight:700,color:cC(ach)}}>{ach}%</span>
+            <div style={{width:40}}><Bar v={ach} max={100} color={cC(ach)} h={3}/></div>
+          </div>
+        </td>
+        <td style={{padding:"9px 12px",color:C.blue,fontWeight:600}}>{(+m.upt||0).toFixed(1)}</td>
+        <td style={{padding:"9px 12px",color:C.sub}}>{fE(m.atv)}</td>
+        <td style={{padding:"9px 12px"}}>{canAdd&&<Bt onClick={async()=>{if(!confirm(`Remove ${m.full_name}?`))return;if(m.member_type==="staff"){await sb.q("sales_staff",{method:"PATCH",body:{is_active:false},qs:`id=eq.${m.person_id}`});reload();}}} sz="sm" v="ghost">✕</Bt>}</td>
+      </tr>);
+    })}</tbody>
+  </table>
+</GC>}
+</div>);}
+
 const PM={dash:"Dashboard",war:"War Room",reports:"Reports",new_report:"New Report",rpt_detail:"Report Detail",tasks:"Tasks",new_task:"New Task",incidents:"Incidents",new_incident:"Report Issue",sales:"Sales & Targets",vm:"VM Academy",sales_upload:"Sales Upload",branches:"Stores",branch_twin:"Store Detail",employees:"Employees",emp_detail:"Employee Profile",learning:"Learning",cx:"CX Readiness",ai:"AI Insights",notifs:"Notifications",activity:"Activity",users:"Users",settings:"Settings"};
 
 function App(){const{user,profile,rdy,sessionRole,setSessionRole,effectiveRole}=useAuth();const[pg,rawSetPg]=useState("dash");const[rC,sRC]=useState(null);const[brC,sBrC]=useState(null);const[empC,sEmpC]=useState(null);
-const setPg=(target)=>{if(typeof target==="object"&&target.id){if(target.id==="branch_twin"){sBrC(target.data);rawSetPg("branch_twin");}else if(target.id==="emp_detail"){sEmpC(target.data);rawSetPg("emp_detail");}else rawSetPg(target.id);}else rawSetPg(target);};
+const[sideOpen,setSideOpen]=useState(false);
+const isMobile=()=>typeof window!=="undefined"&&window.innerWidth<768;
+const setPg=(target)=>{if(isMobile())setSideOpen(false);if(typeof target==="object"&&target.id){if(target.id==="branch_twin"){sBrC(target.data);rawSetPg("branch_twin");}else if(target.id==="emp_detail"){sEmpC(target.data);rawSetPg("emp_detail");}else rawSetPg(target.id);}else rawSetPg(target);};
 const{data:un,reload:rlN}=useQ("notifications","is_read=eq.false");
 useEffect(()=>{const t=setInterval(rlN,15000);return()=>clearInterval(t);},[rlN]);
 if(!rdy)return <Ld t="Connecting to RAVIN Academy..."/>;
 if(!user)return <Login/>;
 if(profile?.can_select_role&&!sessionRole)return <RoleSelector branchName={profile.full_name||"Branch"} onSelect={setSessionRole}/>;
 const nC=un.length;const title=PM[pg]||"RAVIN Academy";
-return(<div style={{minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans','Inter',system-ui,sans-serif"}}><style>{`@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}`}</style>
-<Side pg={pg} setPg={setPg} profile={profile} nC={nC} effectiveRole={effectiveRole}/>
-<main style={{marginLeft:216,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
-<div style={{position:"sticky",top:0,zIndex:100,background:"#FFFFFF",borderBottom:`1px solid ${C.bd}`,padding:"12px 26px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><div style={{fontSize:14,fontWeight:800,color:C.text}}>{title}</div><div style={{display:"flex",gap:8,alignItems:"center"}}>{pg==="dash"&&<Bt onClick={()=>setPg("new_report")} v="gold" sz="sm">+ Report</Bt>}<button onClick={()=>setPg("notifs")} style={{position:"relative",background:"none",border:`1px solid ${C.bd}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:12,color:C.sub}}>◎{nC>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.red,color:"#fff",fontSize:8,fontWeight:700,borderRadius:10,padding:"1px 5px"}}>{nC}</span>}</button></div></div>
+const mob=isMobile();
+return(<div style={{minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans','Inter',system-ui,sans-serif"}}><style>{`@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@media(max-width:767px){.sidebar{transform:${sideOpen?"translateX(0)":"translateX(-100%)"} !important;}}`}</style>
+{/* Mobile overlay */}
+{sideOpen&&<div onClick={()=>setSideOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:199,display:"block"}}/>}
+<Side pg={pg} setPg={setPg} profile={profile} nC={nC} effectiveRole={effectiveRole} sideOpen={sideOpen} setSideOpen={setSideOpen}/>
+<main style={{marginLeft:mob?0:216,minHeight:"100vh",display:"flex",flexDirection:"column",transition:"margin 0.3s"}}>
+<div style={{position:"sticky",top:0,zIndex:100,background:"#FFFFFF",borderBottom:`1px solid ${C.bd}`,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+<div style={{display:"flex",alignItems:"center",gap:10}}>
+{/* Hamburger — mobile only */}
+<button onClick={()=>setSideOpen(!sideOpen)} style={{background:"none",border:`1px solid ${C.bd}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:16,color:C.blue,display:mob?"flex":"none",alignItems:"center",justifyContent:"center",lineHeight:1}}>
+<span style={{display:"flex",flexDirection:"column",gap:"4px",width:16}}><span style={{height:2,background:C.blue,borderRadius:1,display:"block",width:sideOpen?"100%":"100%"}}/><span style={{height:2,background:C.blue,borderRadius:1,display:"block"}}/><span style={{height:2,background:C.blue,borderRadius:1,display:"block",width:sideOpen?"60%":"100%"}}/></span>
+</button>
+<div style={{fontSize:14,fontWeight:800,color:C.text}}>{title}</div></div>
+<div style={{display:"flex",gap:8,alignItems:"center"}}>{pg==="dash"&&<Bt onClick={()=>setPg("new_report")} v="gold" sz="sm">+ Report</Bt>}<button onClick={()=>setPg("notifs")} style={{position:"relative",background:"none",border:`1px solid ${C.bd}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:12,color:C.sub}}>◎{nC>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.red,color:"#fff",fontSize:8,fontWeight:700,borderRadius:10,padding:"1px 5px"}}>{nC}</span>}</button></div></div>
 <div style={{flex:1,padding:"18px 24px"}}>
 {pg==="dash"&&<Dash setPg={setPg}/>}
 {pg==="war"&&<WarRoom/>}
@@ -732,6 +956,7 @@ return(<div style={{minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans','Int
 {pg==="users"&&<UsersPage/>}
 {pg==="sales_upload"&&<SalesUploadPage/>}
 {pg==="settings"&&<ProfileSettings/>}
+{pg==="team"&&<MyTeam/>}
 </div></main></div>);}
 
 export default function RavinAcademy(){return <TP><AP><App/></AP></TP>;}
