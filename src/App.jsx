@@ -1258,3 +1258,4 @@ return(<div style={{minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans','Int
 </div></main></div>);}
 
 export default function RavinAcademy(){return <TP><AP><App/></AP></TP>;}
+
