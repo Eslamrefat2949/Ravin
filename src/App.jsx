@@ -80,18 +80,24 @@ const[u,sU]=useState(null);const[p,sP]=useState(null);const[br,sBr]=useState([])
 const[sRole,setSRS]=useState(()=>{try{return sessionStorage.getItem("sb_role")||null;}catch{return null;}});
 const bm=Object.fromEntries(br.map(b=>[b.id,b.name]));
 useEffect(()=>{(async()=>{
-// try refresh first in case token expired
+try{
 let user=await sb.getUser();
-if(!user){const ok=await sb.refresh();if(ok)user=await sb.getUser();}
+if(!user){
+  try{
+    let ref=null;try{ref=localStorage.getItem("sb_refresh");}catch{}
+    if(ref){const r=await fetch(`${SU}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:ref})});
+    if(r.ok){const d=await r.json();try{localStorage.setItem("sb_token",d.access_token);localStorage.setItem("sb_refresh",d.refresh_token);}catch{}
+    user=await sb.getUser();}}
+  }catch{}
+}
 if(user){sU(user);
 try{const[pr]=await sb.q("profiles",{qs:`id=eq.${user.id}`});sP(pr);}catch{}
-try{sBr(await sb.q("branches",{qs:"is_active=eq.true&order=name"})||[]);}catch{}
-// start auto-refresh
-if(typeof window!=="undefined"){clearInterval(window._ravRefresh);window._ravRefresh=setInterval(()=>sb.refresh(),50*60*1000);}
-}sR(true);})();},[]);
+try{sBr(await sb.q("branches",{qs:"is_active=eq.true&order=name"})||[]);}catch{}}
+}catch{}finally{sR(true);}
+})();},[]);
 const login=async(em,pw)=>{const d=await sb.signIn(em,pw);sU(d.user);try{const[pr]=await sb.q("profiles",{qs:`id=eq.${d.user.id}`});sP(pr);}catch{}try{sBr(await sb.q("branches",{qs:"is_active=eq.true&order=name"})||[]);}catch{};
 // start auto-refresh every 50min
-if(typeof window!=="undefined"){clearInterval(window._ravRefresh);window._ravRefresh=setInterval(()=>sb.refresh(),50*60*1000);}
+if(typeof window!=="undefined"){clearInterval(window._ravRefresh);window._ravRefresh=setInterval(async()=>{try{let ref=null;try{ref=localStorage.getItem("sb_refresh");}catch{}if(ref){const r=await fetch(`${SU}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{apikey:SK,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:ref})});if(r.ok){const d=await r.json();try{localStorage.setItem("sb_token",d.access_token);localStorage.setItem("sb_refresh",d.refresh_token);}catch{}}}}catch{}},50*60*1000);}
 return d.user;};
 const logout=async()=>{await sb.signOut();sU(null);sP(null);try{sessionStorage.removeItem("sb_role");}catch{}setSRS(null);if(typeof window!=="undefined")clearInterval(window._ravRefresh);};
 const setSessionRole=(r)=>{setSRS(r);try{if(r)sessionStorage.setItem("sb_role",r);else sessionStorage.removeItem("sb_role");}catch{}};
@@ -143,17 +149,14 @@ return(<div style={{minHeight:"100vh",background:"#F0F4F8",display:"flex",alignI
 // ═══════════════════════════════════════════════════════════════════════
 function Side({pg,setPg,profile:p,nC,effectiveRole:er,sideOpen,setSideOpen}){const{logout}=useAuth();
 const nav=[
-  {id:"dash",l:"Dashboard",i:"◈",g:"CORE"},{id:"war",l:"War Room",i:"⬡",g:"CORE"},
+  const nav=[
+  {id:"dash",l:"Dashboard",i:"◈",g:"CORE"},
   {id:"reports",l:"Reports",i:"◉",g:"OPS"},{id:"new_report",l:"New Report",i:"✚",g:"OPS",hl:1},
   {id:"tasks",l:"Tasks",i:"☰",g:"OPS"},{id:"new_task",l:"New Task",i:"+",g:"OPS",hl:1},
-  {id:"incidents",l:"Incidents",i:"⚠",g:"OPS"},{id:"new_incident",l:"Report Issue",i:"!",g:"OPS",hl:1},
-  {id:"sales",l:"Sales & Targets",i:"◆",g:"COMMERCIAL"},{id:"vm",l:"VM Academy",i:"◇",g:"COMMERCIAL"},
-  {id:"branches",l:"Stores",i:"⊡",g:"STORES"},
-  {id:"employees",l:"Employees",i:"◑",g:"PEOPLE"},{id:"learning",l:"Learning",i:"⊞",g:"PEOPLE"},
-  {id:"cx",l:"CX Readiness",i:"★",g:"PEOPLE"},
+  {id:"sales",l:"Sales & Targets",i:"◆",g:"COMMERCIAL"},
+  {id:"team",l:"My Team",i:"◑",g:"PEOPLE"},
   {id:"ai",l:"AI Insights",i:"✦",g:"INTEL"},{id:"notifs",l:"Notifications",i:"◎",badge:nC,g:"INTEL"},
-  {id:"activity",l:"Activity",i:"≡",g:"INTEL"},
-  ...(p?.role==="admin"?[{id:"users",l:"Users",i:"⊕",g:"ADMIN"}]:[]),
+  ...((er==="admin"||er==="area_manager")?[{id:"users",l:"Users",i:"⊕",g:"ADMIN"},{id:"settings",l:"Settings",i:"⚙",g:"ADMIN"}]:[]),
 ];
 const gs=[...new Set(nav.map(n=>n.g))];
 return(<aside style={{width:216,minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",position:"fixed",left:0,top:0,bottom:0,zIndex:200,borderRight:`1px solid ${C.bd}`,boxShadow:"2px 0 8px rgba(0,0,0,0.04)"}}>
@@ -906,6 +909,303 @@ return(<div>
 </GC>}
 </div>);}
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// TASKS V2 — with type: operational, vm, cx, incident, merch
+// ═══════════════════════════════════════════════════════════════════════
+const TASK_TYPES=[
+  {id:"operational",label:"Operational",icon:"📋",color:C.blue},
+  {id:"vm",label:"VM Execution",icon:"◇",color:C.purple},
+  {id:"cx",label:"CX Check",icon:"★",color:C.green},
+  {id:"incident",label:"Incident",icon:"⚠",color:C.red},
+  {id:"merch",label:"Merch / Stock",icon:"📦",color:C.amber},
+];
+
+function TasksV2({setPg}){
+const{data,loading,reload}=useQ("tasks","is_deleted=eq.false&order=created_at.desc");
+const{bm,profile}=useAuth();const{toast}=useToast();
+const[filter,setFilter]=useState("all");
+const[showNew,setShowNew]=useState(false);
+const[form,setForm]=useState({title:"",desc:"",branch_id:"",priority:"medium",due:"",task_type:"operational",incident_type:"",severity:"medium",campaign_name:""});
+const[vmScores,setVmScores]=useState({window:80,mannequin:80,folding:80,promo:80});
+const[cx,setCx]=useState({lighting:false,music:false,clean:false,queue:false,fitting:false,steam:false,scent:false,flow:false});
+const[beforeUrl,setBeforeUrl]=useState(null);const[afterUrl,setAfterUrl]=useState(null);
+const[busy,setBusy]=useState(false);
+const{branches}=useAuth();
+const filtered=filter==="all"?data:data.filter(t=>t.task_type===filter);
+const overdue=data.filter(t=>t.is_overdue&&t.status!=="completed").length;
+
+const submit=async()=>{
+if(!form.title.trim()){toast("Enter task title","error");return;}
+setBusy(true);
+try{
+  const vmScore=["window","mannequin","folding","promo"].reduce((s,k)=>s+(+vmScores[k]||0),0)/4;
+  const cxScore=Object.values(cx).filter(Boolean).length/8*100;
+  const body={title:form.title,description:form.desc||null,branch_id:form.branch_id||null,created_by:profile.id,
+    priority:form.priority,due_date:form.due||null,status:"pending",
+    task_type:form.task_type,campaign_name:form.campaign_name||null,
+    incident_type:form.task_type==="incident"?form.incident_type:null,
+    severity:form.task_type==="incident"?form.severity:"medium",
+    vm_window_score:form.task_type==="vm"?+vmScores.window:null,
+    vm_mannequin_score:form.task_type==="vm"?+vmScores.mannequin:null,
+    vm_folding_score:form.task_type==="vm"?+vmScores.folding:null,
+    vm_promo_score:form.task_type==="vm"?+vmScores.promo:null,
+    vm_overall_score:form.task_type==="vm"?Math.round(vmScore):null,
+    before_image_url:beforeUrl,after_image_url:afterUrl,
+    ...Object.fromEntries(Object.entries(cx).map(([k,v])=>[`cx_${k==="clean"?"cleanliness":k==="steam"?"steaming":k}`,v])),
+    cx_score:form.task_type==="cx"?Math.round(cxScore):null,
+  };
+  await sb.q("tasks",{method:"POST",body});
+  toast("Task created!","success");
+  setShowNew(false);setForm({title:"",desc:"",branch_id:"",priority:"medium",due:"",task_type:"operational",incident_type:"",severity:"medium",campaign_name:""});
+  setVmScores({window:80,mannequin:80,folding:80,promo:80});setCx({lighting:false,music:false,clean:false,queue:false,fitting:false,steam:false,scent:false,flow:false});
+  setBeforeUrl(null);setAfterUrl(null);reload();
+}catch(e){toast(e.message,"error");}
+setBusy(false);};
+
+const markDone=async(id)=>{try{await sb.q("tasks",{method:"PATCH",body:{status:"completed"},qs:`id=eq.${id}`});reload();}catch(e){toast(e.message,"error");}};
+
+if(loading)return <Ld/>;
+const tt=TASK_TYPES.find(t=>t.id===form.task_type);
+
+return(<div>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
+<div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+  {[{id:"all",label:"All",count:data.length},{id:"operational",label:"Ops"},{id:"vm",label:"VM"},{id:"cx",label:"CX"},{id:"incident",label:"Incidents"},{id:"merch",label:"Merch"}].map(f=>(<button key={f.id} onClick={()=>setFilter(f.id)} style={{padding:"5px 12px",borderRadius:6,border:"none",cursor:"pointer",background:filter===f.id?C.blueS:"transparent",color:filter===f.id?C.blue:C.sub,fontSize:10,fontWeight:filter===f.id?700:400,fontFamily:"inherit"}}>{f.label}{f.count?` (${f.count})`:""}</button>))}
+  {overdue>0&&<span style={{fontSize:9,fontWeight:700,color:C.red,background:C.redS,padding:"3px 8px",borderRadius:5}}>⚠ {overdue} OVERDUE</span>}
+</div>
+<Bt onClick={()=>setShowNew(!showNew)} v={showNew?"danger":"gold"} sz="md">{showNew?"✕ Cancel":"+ New Task"}</Bt>
+</div>
+
+{showNew&&<GC style={{padding:"20px 24px",marginBottom:14,border:`1px solid ${C.bd}`}}>
+{/* Task type selector */}
+<div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
+{TASK_TYPES.map(t=>(<button key={t.id} onClick={()=>setForm(p=>({...p,task_type:t.id}))} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${form.task_type===t.id?t.color:C.bd}`,background:form.task_type===t.id?t.color+"18":"transparent",color:form.task_type===t.id?t.color:C.sub,fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t.icon} {t.label}</button>))}
+</div>
+
+{/* Base fields */}
+<div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>TITLE</label><input value={form.title} onChange={e=>setForm(p=>({...p,title:e.target.value}))} placeholder={`${tt?.icon} ${tt?.label} task...`} style={iS}/></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>BRANCH</label><select value={form.branch_id} onChange={e=>setForm(p=>({...p,branch_id:e.target.value}))} style={iS}><option value="">All</option>{branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>PRIORITY</label><select value={form.priority} onChange={e=>setForm(p=>({...p,priority:e.target.value}))} style={iS}>{["low","medium","high","critical"].map(p=><option key={p}>{p}</option>)}</select></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>DUE DATE</label><input type="datetime-local" value={form.due} onChange={e=>setForm(p=>({...p,due:e.target.value}))} style={iS}/></div>
+</div>
+
+{/* VM fields */}
+{form.task_type==="vm"&&<div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>CAMPAIGN NAME</label><input value={form.campaign_name} onChange={e=>setForm(p=>({...p,campaign_name:e.target.value}))} placeholder="Fall Collection..." style={iS}/></div>
+<div style={{gridColumn:"span 1"}}></div>
+</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:10}}>
+{[{k:"window",l:"Window"},{k:"mannequin",l:"Mannequin"},{k:"folding",l:"Folding"},{k:"promo",l:"Promo"}].map(f=>(<div key={f.k}><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>{f.l} SCORE</label><input type="number" min="0" max="100" value={vmScores[f.k]} onChange={e=>setVmScores(p=>({...p,[f.k]:e.target.value}))} style={{...iS,textAlign:"center",fontWeight:700}}/></div>))}
+</div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>BEFORE PHOTO</label><FileUpload bucket="task-images" label="Upload Before" onUploaded={setBeforeUrl}/></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>AFTER PHOTO</label><FileUpload bucket="task-images" label="Upload After" onUploaded={setAfterUrl}/></div>
+</div>
+</div>}
+
+{/* CX fields */}
+{form.task_type==="cx"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:10}}>
+{[{k:"lighting",l:"💡 Lighting"},{k:"music",l:"🎵 Music"},{k:"clean",l:"✨ Cleanliness"},{k:"queue",l:"🚶 Queue Ready"},{k:"fitting",l:"👗 Fitting Rooms"},{k:"steam",l:"♨️ Steaming"},{k:"scent",l:"🌸 Scent"},{k:"flow",l:"↗️ Customer Flow"}].map(item=>(<div key={item.k} onClick={()=>setCx(p=>({...p,[item.k]:!p[item.k]}))} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:7,cursor:"pointer",background:cx[item.k]?C.greenS:"rgba(0,0,0,0.02)",border:`1px solid ${cx[item.k]?C.green+"30":C.bd}`}}>
+<div style={{width:16,height:16,borderRadius:4,border:`2px solid ${cx[item.k]?C.green:C.bd}`,background:cx[item.k]?C.green:"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"#fff",fontWeight:900}}>{cx[item.k]&&"✓"}</div>
+<span style={{fontSize:11,color:cx[item.k]?C.text:C.sub}}>{item.l}</span>
+</div>))}
+</div>}
+
+{/* Incident fields */}
+{form.task_type==="incident"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>INCIDENT TYPE</label><select value={form.incident_type} onChange={e=>setForm(p=>({...p,incident_type:e.target.value}))} style={iS}><option value="">Select...</option>{["POS Issue","AC Issue","Maintenance","Customer Complaint","Staff Shortage","VM Issue","Stock Issue"].map(t=><option key={t}>{t}</option>)}</select></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>SEVERITY</label><select value={form.severity} onChange={e=>setForm(p=>({...p,severity:e.target.value}))} style={iS}>{["low","medium","high","critical"].map(s=><option key={s}>{s}</option>)}</select></div>
+{form.severity==="critical"&&<div style={{gridColumn:"span 2",padding:"8px 12px",background:C.redS,borderRadius:7,fontSize:9,color:C.red,fontWeight:700}}>⚡ Critical = Emergency task auto-created + all managers notified</div>}
+</div>}
+
+<div style={{marginBottom:10}}><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>DESCRIPTION</label><textarea value={form.desc} onChange={e=>setForm(p=>({...p,desc:e.target.value}))} placeholder="Details..." style={{...iS,resize:"vertical",minHeight:52}}/></div>
+<Bt onClick={submit} v="gold" sz="lg" disabled={busy}>{busy?"Creating...":"Create Task →"}</Bt>
+</GC>}
+
+{filtered.length===0?<Em icon="☰" title="No tasks" msg="Create your first task above."/>:
+filtered.map(t=>{const typ=TASK_TYPES.find(x=>x.id===(t.task_type||"operational"))||TASK_TYPES[0];
+return(<GC key={t.id} style={{padding:"12px 16px",marginBottom:6,borderRight:`3px solid ${t.is_overdue&&t.status!=="completed"?C.red:pC(t.priority)}`}}>
+<div style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"flex-start"}}>
+<div style={{flex:1}}>
+<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+<span style={{fontSize:12}}>{typ.icon}</span>
+<span style={{fontSize:11,fontWeight:700,color:C.text}}>{t.title}</span>
+{t.is_overdue&&t.status!=="completed"&&<Chip text="OVERDUE" color={C.red} bg={C.redS}/>}
+<span style={{fontSize:9,color:typ.color,fontWeight:600,background:typ.color+"15",padding:"1px 6px",borderRadius:4}}>{typ.label}</span>
+</div>
+<div style={{fontSize:9,color:C.muted}}>📍 {bm[t.branch_id]||"All"}{t.due_date&&` · 🕐 ${new Date(t.due_date).toLocaleDateString()}`}</div>
+{/* VM scores */}
+{t.task_type==="vm"&&t.vm_overall_score&&<div style={{display:"flex",gap:8,marginTop:4}}>
+{[{l:"Window",v:t.vm_window_score},{l:"Mannequin",v:t.vm_mannequin_score},{l:"Folding",v:t.vm_folding_score},{l:"Promo",v:t.vm_promo_score}].map(x=>(<span key={x.l} style={{fontSize:8,color:C.sub}}>{x.l}: <b style={{color:+x.v>=80?C.green:C.amber}}>{x.v}</b></span>))}
+<span style={{fontSize:8,fontWeight:700,color:C.purple}}>Overall: {t.vm_overall_score}</span>
+</div>}
+{/* CX score */}
+{t.task_type==="cx"&&t.cx_score!=null&&<div style={{fontSize:9,color:C.green,fontWeight:700,marginTop:3}}>CX Score: {t.cx_score}%</div>}
+{/* Before/After */}
+{(t.before_image_url||t.after_image_url)&&<div style={{display:"flex",gap:4,marginTop:6}}>
+{t.before_image_url&&<img src={t.before_image_url} alt="B" style={{width:48,height:36,borderRadius:4,objectFit:"cover"}}/>}
+{t.after_image_url&&<img src={t.after_image_url} alt="A" style={{width:48,height:36,borderRadius:4,objectFit:"cover"}}/>}
+</div>}
+</div>
+<div style={{display:"flex",flexDirection:"column",gap:4,alignItems:"flex-end"}}>
+<SB status={t.status}/>
+{t.status!=="completed"&&<Bt onClick={()=>markDone(t.id)} sz="sm" v="gold">✓ Done</Bt>}
+</div>
+</div>
+</GC>);})}
+</div>);}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SALES V2 — with Excel upload, export, weekly breakdown, month selector
+// ═══════════════════════════════════════════════════════════════════════
+function SalesV2(){
+const{data:comm,loading,reload}=useQ("commercial_overview","order=mtd_achievement_pct.desc");
+const{data:weekly}=useQ("weekly_branch_performance","order=week_start.desc,weekly_sales.desc");
+const{profile,branches}=useAuth();const{toast}=useToast();
+const isAdmin=["admin","area_manager"].includes(profile?.effectiveRole||profile?.role);
+const[tab,setTab]=useState("overview");
+const[importing,setImporting]=useState(false);
+const[preview,setPreview]=useState(null);
+const[bForm,setBForm]=useState({branch_id:"",month:new Date().toISOString().slice(0,7),target:"",actual:"",gross:""});
+const fileRef=useRef();
+
+// Excel import
+const handleFile=async(e)=>{
+const file=e.target.files?.[0];if(!file)return;
+setImporting(true);
+try{
+const {read,utils}=await import("xlsx");
+const buf=await file.arrayBuffer();
+const wb=read(buf);
+const ws=wb.Sheets[wb.SheetNames[0]];
+const rows=utils.sheet_to_json(ws);
+setPreview(rows.slice(0,5));
+toast(`${rows.length} rows ready to import — review below`,"success");
+}catch(e){toast("Error reading file: "+e.message,"error");}
+setImporting(false);
+};
+
+const confirmImport=async()=>{
+if(!preview)return;setImporting(true);
+try{
+const{read,utils}=await import("xlsx");
+const file=fileRef.current.files[0];
+const buf=await file.arrayBuffer();const wb=read(buf);
+const ws=wb.Sheets[wb.SheetNames[0]];
+const rows=utils.sheet_to_json(ws);
+const res=await sb.rpc("bulk_upsert_daily_sales",{p_rows:JSON.stringify(rows)});
+toast(`Imported ${res} records!`,"success");setPreview(null);reload();
+}catch(e){toast(e.message,"error");}
+setImporting(false);};
+
+// Excel export
+const exportExcel=async()=>{
+try{
+const{utils,writeFile}=await import("xlsx");
+const rows=comm.map(c=>({Branch:c.branch_name,MTD_Sales:c.mtd_sales,Target:c.monthly_target,Remaining:c.remaining,Achievement_Pct:c.mtd_achievement_pct,Gross_Pct:c.gross_percentage,Today_Sales:c.today_sales,UPT:c.today_upt,ATV:c.today_atv}));
+const ws=utils.json_to_sheet(rows);const wb=utils.book_new();utils.book_append_sheet(wb,ws,"Sales");
+writeFile(wb,`RAVIN_Sales_${new Date().toISOString().slice(0,10)}.xlsx`);
+}catch(e){toast("Export error: "+e.message,"error");}};
+
+const saveBranchTarget=async()=>{
+if(!bForm.branch_id){toast("Select branch","error");return;}
+try{await sb.rpc("upsert_branch_monthly_sales",{p_branch_id:bForm.branch_id,p_month:bForm.month+"-01",p_monthly_target:+bForm.target||0,p_actual_sales:+bForm.actual||0,p_gross_percentage:+bForm.gross||0,p_user_id:profile.id});
+toast("Saved!","success");reload();}catch(e){toast(e.message,"error");}};
+
+const tS=comm.reduce((s,c)=>s+(+c.mtd_sales||0),0);
+const tT=comm.reduce((s,c)=>s+(+c.monthly_target||0),0);
+const aA=tT?Math.round(tS/tT*100):0;
+
+// Group weekly by week
+const weeks=[...new Set(weekly.map(w=>w.week_start))].slice(0,4);
+const weeklyByBranch={};weekly.forEach(w=>{if(!weeklyByBranch[w.week_start])weeklyByBranch[w.week_start]={};weeklyByBranch[w.week_start][w.branch_id]={sales:w.weekly_sales,atv:w.weekly_atv,upt:w.weekly_upt,label:w.week_label};});
+
+if(loading)return <Ld/>;
+
+return(<div>
+{/* KPIs */}
+<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(110px,1fr))",gap:8,marginBottom:14}}>
+{[{l:"MTD Sales",v:fE(tS),c:C.gold},{l:"Target",v:fE(tT),c:C.text},{l:"Remaining",v:fE(Math.max(tT-tS,0)),c:tT>tS?C.amber:C.green},{l:"Achievement",v:`${aA}%`,c:cC(aA),ring:1,rp:aA}].map((k,i)=>(<GC key={i} style={{padding:"12px 14px",textAlign:"center"}}><div style={{fontSize:8,color:C.muted,textTransform:"uppercase",marginBottom:4}}>{k.l}</div><div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><div style={{fontSize:16,fontWeight:800,color:k.c}}>{k.v}</div>{k.ring&&<Ring pct={k.rp} sz={28} sw={3} color={k.c}/>}</div></GC>))}
+</div>
+
+{/* Tabs */}
+<div style={{display:"flex",gap:4,marginBottom:14,flexWrap:"wrap"}}>
+{[{id:"overview",l:"📊 Overview"},{id:"weekly",l:"📅 Weekly"},{id:"upload",l:"⬆ Upload Excel",admin:true},{id:"targets",l:"🎯 Set Targets",admin:true}].filter(t=>!t.admin||isAdmin).map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",background:tab===t.id?C.blueS:"transparent",color:tab===t.id?C.blue:C.sub,fontSize:10,fontWeight:tab===t.id?700:400,fontFamily:"inherit",borderBottom:tab===t.id?`2px solid ${C.blue}`:"2px solid transparent"}}>{t.l}</button>))}
+{isAdmin&&<div style={{marginRight:"auto"}}/> && <Bt onClick={exportExcel} v="ghost" sz="sm">⬇ Export Excel</Bt>}
+</div>
+
+{/* Overview */}
+{tab==="overview"&&<GC style={{overflow:"hidden"}}>
+<table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
+<thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["#","Branch","MTD Sales","Target","Remaining","Achievement","Gross %"].map(h=>(<th key={h} style={{padding:"9px 12px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700,textTransform:"uppercase"}}>{h}</th>))}</tr></thead>
+<tbody>{comm.map((c,i)=>{const ach=+c.mtd_achievement_pct||0;return(<tr key={c.branch_id} style={{borderBottom:`1px solid ${C.bd}`}}>
+<td style={{padding:"9px 12px",color:i<3?C.gold:C.muted,fontWeight:700}}>#{i+1}</td>
+<td style={{padding:"9px 12px",fontWeight:700,color:C.text}}>{c.branch_name}</td>
+<td style={{padding:"9px 12px",fontWeight:700,color:C.gold}}>{fE(c.mtd_sales)}</td>
+<td style={{padding:"9px 12px",color:C.sub}}>{fE(c.monthly_target)}</td>
+<td style={{padding:"9px 12px",color:+c.remaining>0?C.amber:C.green,fontWeight:600}}>{fE(c.remaining)}</td>
+<td style={{padding:"9px 12px"}}><div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontWeight:700,color:cC(ach)}}>{ach}%</span><div style={{width:40}}><Bar v={ach} max={100} color={cC(ach)} h={3}/></div></div></td>
+<td style={{padding:"9px 12px",color:+c.gross_percentage>0?C.green:C.muted,fontWeight:600}}>{+c.gross_percentage>0?`${c.gross_percentage}%`:"—"}</td>
+</tr>);})}</tbody>
+</table>
+</GC>}
+
+{/* Weekly */}
+{tab==="weekly"&&<div>
+{weeks.length===0?<Em icon="📅" title="No weekly data" msg="Upload daily sales to see weekly breakdown."/>:
+weeks.map(wk=>{const wData=weeklyByBranch[wk]||{};return(<GC key={wk} style={{marginBottom:10,overflow:"hidden"}}>
+<div style={{padding:"10px 16px",background:C.blueS,borderBottom:`1px solid ${C.bd}`,display:"flex",gap:8,alignItems:"center"}}>
+<span style={{fontSize:10,fontWeight:700,color:C.blue}}>📅 Week of {new Date(wk).toLocaleDateString()}</span>
+</div>
+<table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
+<thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["Branch","Weekly Sales","ATV","UPT"].map(h=>(<th key={h} style={{padding:"7px 12px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700,textTransform:"uppercase"}}>{h}</th>))}</tr></thead>
+<tbody>{comm.map(b=>{const wd=wData[b.branch_id]||{};return(<tr key={b.branch_id} style={{borderBottom:`1px solid ${C.bd}`}}>
+<td style={{padding:"8px 12px",fontWeight:700,color:C.text}}>{b.branch_name}</td>
+<td style={{padding:"8px 12px",color:C.gold,fontWeight:700}}>{fE(wd.sales||0)}</td>
+<td style={{padding:"8px 12px",color:C.sub}}>{fE(wd.atv||0)}</td>
+<td style={{padding:"8px 12px",color:C.blue}}>{(wd.upt||0).toFixed(1)}</td>
+</tr>);})}</tbody>
+</table>
+</GC>);})}
+</div>}
+
+{/* Upload Excel */}
+{tab==="upload"&&<div>
+<GC style={{padding:"20px 24px",marginBottom:14}}>
+<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:8}}>Upload Sales Excel / CSV</div>
+<p style={{fontSize:12,color:C.sub,marginBottom:14}}>File columns: <code style={{background:"rgba(0,0,0,0.04)",padding:"1px 6px",borderRadius:4,fontFamily:"monospace"}}>branch_name, sale_date, total_sales, total_invoices, total_quantity, traffic</code></p>
+<input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleFile} style={{display:"none"}}/>
+<div style={{display:"flex",gap:10}}>
+<Bt onClick={()=>fileRef.current?.click()} v="gold" sz="lg" disabled={importing}>{importing?"Processing...":"📎 Choose File"}</Bt>
+{preview&&<Bt onClick={confirmImport} v="gold" sz="lg" disabled={importing}>{importing?"Importing...":"✓ Confirm Import"}</Bt>}
+</div>
+{preview&&<div style={{marginTop:14}}>
+<div style={{fontSize:10,fontWeight:700,color:C.text,marginBottom:8}}>Preview (first 5 rows):</div>
+<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
+<thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{Object.keys(preview[0]||{}).map(h=>(<th key={h} style={{padding:"6px 10px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700}}>{h}</th>))}</tr></thead>
+<tbody>{preview.map((r,i)=>(<tr key={i} style={{borderBottom:`1px solid ${C.bd}`}}>{Object.values(r).map((v,j)=>(<td key={j} style={{padding:"6px 10px",color:C.sub}}>{String(v)}</td>))}</tr>))}</tbody>
+</table></div>
+</div>}
+</GC>
+</div>}
+
+{/* Set Targets */}
+{tab==="targets"&&<GC style={{padding:"20px 24px"}}>
+<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:14}}>Set Monthly Target</div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr auto",gap:10,alignItems:"flex-end"}}>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>BRANCH</label><select value={bForm.branch_id} onChange={e=>setBForm(p=>({...p,branch_id:e.target.value}))} style={iS}><option value="">Select...</option>{branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>MONTH</label><input type="month" value={bForm.month} onChange={e=>setBForm(p=>({...p,month:e.target.value}))} style={iS}/></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>TARGET (EGP)</label><input type="number" value={bForm.target} onChange={e=>setBForm(p=>({...p,target:e.target.value}))} placeholder="1400000" style={iS}/></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>ACTUAL SALES</label><input type="number" value={bForm.actual} onChange={e=>setBForm(p=>({...p,actual:e.target.value}))} placeholder="850000" style={iS}/></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>GROSS %</label><input type="number" step="0.1" value={bForm.gross} onChange={e=>setBForm(p=>({...p,gross:e.target.value}))} placeholder="42.5" style={iS}/></div>
+<Bt onClick={saveBranchTarget} v="gold" sz="lg">Save →</Bt>
+</div>
+</GC>}
+</div>);}
+
 const PM={dash:"Dashboard",war:"War Room",reports:"Reports",new_report:"New Report",rpt_detail:"Report Detail",tasks:"Tasks",new_task:"New Task",incidents:"Incidents",new_incident:"Report Issue",sales:"Sales & Targets",vm:"VM Academy",sales_upload:"Sales Upload",branches:"Stores",branch_twin:"Store Detail",employees:"Employees",emp_detail:"Employee Profile",learning:"Learning",cx:"CX Readiness",ai:"AI Insights",notifs:"Notifications",activity:"Activity",users:"Users",settings:"Settings"};
 
 function App(){const{user,profile,rdy,sessionRole,setSessionRole,effectiveRole}=useAuth();const[pg,rawSetPg]=useState("dash");const[rC,sRC]=useState(null);const[brC,sBrC]=useState(null);const[empC,sEmpC]=useState(null);
@@ -931,10 +1231,9 @@ return(<div style={{minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans','Int
 <span style={{display:"flex",flexDirection:"column",gap:"4px",width:16}}><span style={{height:2,background:C.blue,borderRadius:1,display:"block",width:sideOpen?"100%":"100%"}}/><span style={{height:2,background:C.blue,borderRadius:1,display:"block"}}/><span style={{height:2,background:C.blue,borderRadius:1,display:"block",width:sideOpen?"60%":"100%"}}/></span>
 </button>
 <div style={{fontSize:14,fontWeight:800,color:C.text}}>{title}</div></div>
-<div style={{display:"flex",gap:8,alignItems:"center"}}>{pg==="dash"&&<Bt onClick={()=>setPg("new_report")} v="gold" sz="sm">+ Report</Bt>}<button onClick={()=>setPg("notifs")} style={{position:"relative",background:"none",border:`1px solid ${C.bd}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:12,color:C.sub}}>◎{nC>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.red,color:"#fff",fontSize:8,fontWeight:700,borderRadius:10,padding:"1px 5px"}}>{nC}</span>}</button></div></div>
+<div style={{display:"flex",gap:8,alignItems:"center"}}>{(pg==="dash"||pg==="tasks")&&<Bt onClick={()=>setPg("new_report")} v="gold" sz="sm">+ Report</Bt>}<button onClick={()=>setPg("notifs")} style={{position:"relative",background:"none",border:`1px solid ${C.bd}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",fontSize:12,color:C.sub}}>◎{nC>0&&<span style={{position:"absolute",top:-4,right:-4,background:C.red,color:"#fff",fontSize:8,fontWeight:700,borderRadius:10,padding:"1px 5px"}}>{nC}</span>}</button></div></div>
 <div style={{flex:1,padding:"18px 24px"}}>
 {pg==="dash"&&<Dash setPg={setPg}/>}
-{pg==="war"&&<WarRoom/>}
 {pg==="reports"&&<ReportsPage setPg={setPg} setCtx={sRC}/>}
 {pg==="new_report"&&<NewReport setPg={setPg}/>}
 {pg==="rpt_detail"&&<RptDetail rpt={rC} setPg={setPg}/>}
