@@ -137,7 +137,7 @@ function FileUpload({bucket="report-images",onUploaded,label="Upload Image",acce
 // ═══════════════════════════════════════════════════════════════════════
 function Login(){const{login}=useAuth();const{toast}=useToast();const[em,sE]=useState("");const[pw,sP]=useState("");const[busy,sB]=useState(false);
 const go=async()=>{if(!em||!pw){toast("Enter credentials","error");return;}sB(true);try{await login(em,pw);toast("Welcome to RAVIN Academy!","success");}catch(e){toast(e.message,"error");}sB(false);};
-return(<div style={{minHeight:"100vh",background:"#F0F4F8",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'DM Sans',sans-serif"}}><div style={{position:"absolute",top:"20%",left:"30%",width:500,height:500,background:"radial-gradient(circle,rgba(13,71,161,0.06),transparent 60%)",pointerEvents:"none"}}/><div style={{width:400,padding:"40px 36px",background:"#FFFFFF",boxShadow:"0 4px 24px rgba(0,0,0,0.08)",borderRadius:20,border:`1px solid ${C.bd}`,position:"relative",zIndex:1}}><div style={{textAlign:"center",marginBottom:28}}><div style={{width:44,height:44,borderRadius:11,background:C.blue,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:"#0A0A0A",marginBottom:12}}>R</div><div style={{fontSize:22,fontWeight:900,letterSpacing:"0.1em",color:C.text}}>RAVIN <span style={{color:C.gold}}>ACADEMY</span></div><div style={{fontSize:9,color:C.sub,letterSpacing:"0.22em",marginTop:5}}>MAKE UR WORLD TO BE PROUD</div></div>
+return(<div style={{minHeight:"100vh",background:"#F0F4F8",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'DM Sans',sans-serif"}}><div style={{position:"absolute",top:"20%",left:"30%",width:500,height:500,background:"radial-gradient(circle,rgba(13,71,161,0.06),transparent 60%)",pointerEvents:"none"}}/><div style={{width:400,padding:"40px 36px",background:"#FFFFFF",boxShadow:"0 4px 24px rgba(0,0,0,0.08)",borderRadius:20,border:`1px solid ${C.bd}`,position:"relative",zIndex:1}}><div style={{textAlign:"center",marginBottom:28}}><div style={{width:44,height:44,borderRadius:11,background:C.blue,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:"#0A0A0A",marginBottom:12}}>R</div><div style={{fontSize:22,fontWeight:900,letterSpacing:"0.1em",color:C.text}}>RAVIN <span style={{color:C.gold}}>ACADEMY</span></div><div style={{fontSize:9,color:C.sub,letterSpacing:"0.22em",marginTop:5}}>Make your world be proud</div></div>
 <div style={{marginBottom:12}}><label style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:"0.1em",display:"block",marginBottom:5}}>EMAIL</label><input value={em} onChange={e=>sE(e.target.value)} placeholder="you@ravin.academy" onKeyDown={e=>e.key==="Enter"&&go()} style={iS}/></div>
 <div style={{marginBottom:20}}><label style={{fontSize:9,fontWeight:700,color:C.muted,letterSpacing:"0.1em",display:"block",marginBottom:5}}>PASSWORD</label><input type="password" value={pw} onChange={e=>sP(e.target.value)} placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&go()} style={iS}/></div>
 <Bt onClick={go} v="gold" sz="lg" disabled={busy} style={{width:"100%",fontSize:13}}>{busy?"Signing in...":"Sign In →"}</Bt>
@@ -158,15 +158,15 @@ function Side({pg,setPg,profile:p,nC,effectiveRole:er,sideOpen,setSideOpen}){con
   ...((er==="admin"||er==="area_manager")?[{id:"users",l:"Users",i:"⊕",g:"ADMIN"},{id:"settings",l:"Settings",i:"⚙",g:"ADMIN"}]:[]),
 ];
 const gs=[...new Set(nav.map(n=>n.g))];
-return(<aside style={{width:216,minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",position:"fixed",left:0,top:0,bottom:0,zIndex:200,borderRight:`1px solid ${C.bd}`,boxShadow:"2px 0 8px rgba(0,0,0,0.04)"}}>
+return(<aside className="sidebar" style={{width:216,minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",position:"fixed",left:0,top:0,bottom:0,zIndex:200,borderRight:`1px solid ${C.bd}`,boxShadow:"2px 0 8px rgba(0,0,0,0.04)"}}>
   <div style={{padding:"20px 18px 12px",borderBottom:`1px solid ${C.bd}`}}>
     <div style={{display:"flex",alignItems:"center",gap:9}}>
       <div style={{width:28,height:28,borderRadius:7,background:C.blue,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"#0A0A0A"}}>R</div>
       <div><div style={{fontSize:13,fontWeight:900,letterSpacing:"0.08em",color:C.blue,lineHeight:1}}>RAVIN <span style={{color:C.gold}}>ACADEMY</span></div>
-        <div style={{fontSize:7,color:C.muted,letterSpacing:"0.18em",marginTop:2}}>MAKE UR WORLD TO BE PROUD</div></div></div></div>
+        <div style={{fontSize:7,color:C.muted,letterSpacing:"0.18em",marginTop:2}}>Make your world be proud</div></div></div></div>
   <div style={{flex:1,overflowY:"auto",padding:"6px 8px"}}>{gs.map(g=>(<div key={g}><div style={{fontSize:8,fontWeight:700,color:C.muted,letterSpacing:"0.14em",padding:"10px 10px 4px",textTransform:"uppercase"}}>{g}</div>
     {nav.filter(n=>n.g===g).map(n=>(<button key={n.id} onClick={()=>setPg(n.id)} style={{display:"flex",alignItems:"center",gap:8,width:"100%",padding:"7px 10px",borderRadius:7,border:"none",cursor:"pointer",background:pg===n.id?C.blueS:n.hl?C.blueS+"44":"transparent",color:pg===n.id?C.blue:n.hl?C.blue+"aa":C.sub,fontSize:10.5,fontWeight:pg===n.id?700:400,transition:"all 0.15s",marginBottom:1,textAlign:"left",fontFamily:"inherit",borderLeft:pg===n.id?`2px solid ${C.blue}`:"2px solid transparent"}}><span style={{fontSize:12,width:16,textAlign:"center",flexShrink:0}}>{n.i}</span><span style={{flex:1}}>{n.l}</span>{n.badge>0&&<span style={{background:C.red,color:"#fff",fontSize:8,fontWeight:700,borderRadius:10,padding:"1px 5px"}}>{n.badge}</span>}</button>))}</div>))}</div>
-  <div style={{padding:"10px 14px",borderTop:`1px solid ${C.bd}`}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:26,height:26,borderRadius:"50%",background:C.blue,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"#0A0A0A",flexShrink:0}}>{(p?.full_name||"U").split(" ").map(w=>w[0]).join("").slice(0,2)}</div><div style={{minWidth:0,flex:1}}><div style={{fontSize:10,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p?.full_name}</div><div style={{fontSize:8,color:C.muted}}>{p?.role?.replace("_"," ")}</div></div><button onClick={logout} style={{background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:11,padding:3,background:"none",border:"none"}}>⏻</button></div></div>
+  <div style={{padding:"10px 14px",borderTop:`1px solid ${C.bd}`}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:26,height:26,borderRadius:"50%",background:C.blue,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"#0A0A0A",flexShrink:0}}>{(p?.full_name||"U").split(" ").map(w=>w[0]).join("").slice(0,2)}</div><div style={{minWidth:0,flex:1}}><div style={{fontSize:10,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p?.full_name}</div><div style={{fontSize:8,color:C.muted}}>{p?.role?.replace("_"," ")}</div></div><button onClick={logout} style={{background:"none",border:"none",color:C.muted,cursor:"pointer",fontSize:11,padding:3}}>⏻</button></div></div>
 </aside>);}
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1058,11 +1058,13 @@ return(<GC key={t.id} style={{padding:"12px 16px",marginBottom:6,borderRight:`3p
 </div>);}
 
 // ═══════════════════════════════════════════════════════════════════════
-// SALES V2 — with Excel upload, export, weekly breakdown, month selector
+// ═══════════════════════════════════════════════════════════════════════
+// SALES V2 — 6 tabs: Overview, Weekly, Upload Branch Sales, Upload Employee Sales, Upload Targets, Set Targets + Export
 // ═══════════════════════════════════════════════════════════════════════
 function SalesV2(){
 const{data:comm,loading,reload}=useQ("commercial_overview","order=mtd_achievement_pct.desc");
 const{data:weekly}=useQ("weekly_branch_performance","order=week_start.desc,weekly_sales.desc");
+const{data:empPerf}=useQ("employee_monthly_performance","order=full_name");
 const{profile,branches}=useAuth();const{toast}=useToast();
 const isAdmin=["admin","area_manager"].includes(profile?.effectiveRole||profile?.role);
 const[tab,setTab]=useState("overview");
@@ -1070,44 +1072,76 @@ const[importing,setImporting]=useState(false);
 const[preview,setPreview]=useState(null);
 const[bForm,setBForm]=useState({branch_id:"",month:new Date().toISOString().slice(0,7),target:"",actual:"",gross:""});
 const fileRef=useRef();
+const empFileRef=useRef();
+const targetFileRef=useRef();
+const[empPreview,setEmpPreview]=useState(null);
+const[targetPreview,setTargetPreview]=useState(null);
 
-// Excel import
-const handleFile=async(e)=>{
-const file=e.target.files?.[0];if(!file)return;
-setImporting(true);
-try{
-const {read,utils}=await import("xlsx");
-const buf=await file.arrayBuffer();
-const wb=read(buf);
-const ws=wb.Sheets[wb.SheetNames[0]];
-const rows=utils.sheet_to_json(ws);
-setPreview(rows.slice(0,5));
-toast(`${rows.length} rows ready to import — review below`,"success");
-}catch(e){toast("Error reading file: "+e.message,"error");}
-setImporting(false);
-};
+const loadXLSX=async()=>await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
 
-const confirmImport=async()=>{
+// ── Branch Sales Upload ──
+const handleBranchFile=async(e)=>{
+const file=e.target.files?.[0];if(!file)return;setImporting(true);
+try{const{read,utils}=await loadXLSX();const wb=read(await file.arrayBuffer());const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+setPreview(rows.slice(0,5));toast(`${rows.length} rows ready`,"success");}catch(e){toast("Error: "+e.message,"error");}setImporting(false);};
+
+const confirmBranchImport=async()=>{
 if(!preview)return;setImporting(true);
-try{
-const{read,utils}=await import("xlsx");
-const file=fileRef.current.files[0];
-const buf=await file.arrayBuffer();const wb=read(buf);
-const ws=wb.Sheets[wb.SheetNames[0]];
-const rows=utils.sheet_to_json(ws);
+try{const{read,utils}=await loadXLSX();const wb=read(await fileRef.current.files[0].arrayBuffer());
+const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
 const res=await sb.rpc("bulk_upsert_daily_sales",{p_rows:JSON.stringify(rows)});
-toast(`Imported ${res} records!`,"success");setPreview(null);reload();
-}catch(e){toast(e.message,"error");}
-setImporting(false);};
+toast(`Imported ${res} branch sales records!`,"success");setPreview(null);reload();}catch(e){toast(e.message,"error");}setImporting(false);};
 
-// Excel export
-const exportExcel=async()=>{
-try{
-const{utils,writeFile}=await import("xlsx");
-const rows=comm.map(c=>({Branch:c.branch_name,MTD_Sales:c.mtd_sales,Target:c.monthly_target,Remaining:c.remaining,Achievement_Pct:c.mtd_achievement_pct,Gross_Pct:c.gross_percentage,Today_Sales:c.today_sales,UPT:c.today_upt,ATV:c.today_atv}));
-const ws=utils.json_to_sheet(rows);const wb=utils.book_new();utils.book_append_sheet(wb,ws,"Sales");
-writeFile(wb,`RAVIN_Sales_${new Date().toISOString().slice(0,10)}.xlsx`);
-}catch(e){toast("Export error: "+e.message,"error");}};
+// ── Employee Sales Upload ──
+const handleEmpFile=async(e)=>{
+const file=e.target.files?.[0];if(!file)return;setImporting(true);
+try{const{read,utils}=await loadXLSX();const wb=read(await file.arrayBuffer());const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+setEmpPreview(rows.slice(0,5));toast(`${rows.length} employee rows ready`,"success");}catch(e){toast("Error: "+e.message,"error");}setImporting(false);};
+
+const confirmEmpImport=async()=>{
+if(!empPreview)return;setImporting(true);
+try{const{read,utils}=await loadXLSX();const wb=read(await empFileRef.current.files[0].arrayBuffer());
+const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+const res=await sb.rpc("bulk_upsert_employee_sales",{p_rows:JSON.stringify(rows)});
+toast(`Imported ${res} employee sales records!`,"success");setEmpPreview(null);reload();}catch(e){toast(e.message,"error");}setImporting(false);};
+
+// ── Targets Upload (branches) ──
+const handleTargetFile=async(e)=>{
+const file=e.target.files?.[0];if(!file)return;setImporting(true);
+try{const{read,utils}=await loadXLSX();const wb=read(await file.arrayBuffer());const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+setTargetPreview(rows.slice(0,5));toast(`${rows.length} target rows ready`,"success");}catch(e){toast("Error: "+e.message,"error");}setImporting(false);};
+
+const confirmTargetImport=async()=>{
+if(!targetPreview)return;setImporting(true);
+try{const{read,utils}=await loadXLSX();const wb=read(await targetFileRef.current.files[0].arrayBuffer());
+const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+let saved=0;
+for(const row of rows){
+  try{
+    const bid=branches.find(b=>b.name.toLowerCase().includes((row.branch_name||"").toLowerCase()))?.id;
+    if(!bid)continue;
+    await sb.rpc("upsert_branch_monthly_sales",{p_branch_id:bid,p_month:(row.target_month||new Date().toISOString().slice(0,7)+"-01"),p_monthly_target:+(row.monthly_target||0),p_actual_sales:+(row.actual_sales||0),p_gross_percentage:+(row.gross_percentage||0),p_user_id:profile.id});
+    saved++;
+  }catch{}
+}
+toast(`Imported ${saved} targets!`,"success");setTargetPreview(null);reload();}catch(e){toast(e.message,"error");}setImporting(false);};
+
+// ── Export Functions ──
+const exportBranchExcel=async()=>{
+try{const{utils,writeFile}=await loadXLSX();
+const rows=comm.map(c=>({Branch:c.branch_name,MTD_Sales:+c.mtd_sales||0,Target:+c.monthly_target||0,Remaining:+c.remaining||0,"Achievement_%":+c.mtd_achievement_pct||0,"Gross_%":+c.gross_percentage||0,Today_Sales:+c.today_sales||0,UPT:+c.today_upt||0,ATV:+c.today_atv||0}));
+const ws=utils.json_to_sheet(rows);const wb=utils.book_new();utils.book_append_sheet(wb,ws,"Branch_Sales");
+writeFile(wb,`RAVIN_Branch_Sales_${new Date().toISOString().slice(0,10)}.xlsx`);
+toast("Branch sales exported!","success");}catch(e){toast("Export error: "+e.message,"error");}};
+
+const exportEmpExcel=async()=>{
+try{const{utils,writeFile}=await loadXLSX();
+const rows=empPerf.map(e=>({Employee:e.full_name,Branch:e.branch_name||"",Target:+e.monthly_target||0,MTD_Sales:+e.mtd_sales||0,Remaining:+e.remaining||0,"Achievement_%":+e.achievement_pct||0,Invoices:+e.mtd_invoices||0,UPT:+(+e.upt||0).toFixed(2),ATV:+e.atv||0}));
+const ws=utils.json_to_sheet(rows);const wb=utils.book_new();utils.book_append_sheet(wb,ws,"Employee_Performance");
+writeFile(wb,`RAVIN_Employee_Performance_${new Date().toISOString().slice(0,10)}.xlsx`);
+toast("Employee data exported!","success");}catch(e){toast("Export error: "+e.message,"error");}};
+
+const exportPDF=()=>{window.print();};
 
 const saveBranchTarget=async()=>{
 if(!bForm.branch_id){toast("Select branch","error");return;}
@@ -1117,12 +1151,12 @@ toast("Saved!","success");reload();}catch(e){toast(e.message,"error");}};
 const tS=comm.reduce((s,c)=>s+(+c.mtd_sales||0),0);
 const tT=comm.reduce((s,c)=>s+(+c.monthly_target||0),0);
 const aA=tT?Math.round(tS/tT*100):0;
-
-// Group weekly by week
 const weeks=[...new Set(weekly.map(w=>w.week_start))].slice(0,4);
-const weeklyByBranch={};weekly.forEach(w=>{if(!weeklyByBranch[w.week_start])weeklyByBranch[w.week_start]={};weeklyByBranch[w.week_start][w.branch_id]={sales:w.weekly_sales,atv:w.weekly_atv,upt:w.weekly_upt,label:w.week_label};});
+const weeklyByBranch={};weekly.forEach(w=>{if(!weeklyByBranch[w.week_start])weeklyByBranch[w.week_start]={};weeklyByBranch[w.week_start][w.branch_id]={sales:w.weekly_sales,atv:w.weekly_atv,upt:w.weekly_upt};});
 
 if(loading)return <Ld/>;
+
+const PreviewTable=({data})=>(!data?null:<div style={{marginTop:14}}><div style={{fontSize:10,fontWeight:700,color:C.text,marginBottom:8}}>Preview (first 5 rows):</div><div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}><thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{Object.keys(data[0]||{}).map(h=>(<th key={h} style={{padding:"6px 10px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700}}>{h}</th>))}</tr></thead><tbody>{data.map((r,i)=>(<tr key={i} style={{borderBottom:`1px solid ${C.bd}`}}>{Object.values(r).map((v,j)=>(<td key={j} style={{padding:"6px 10px",color:C.sub}}>{String(v)}</td>))}</tr>))}</tbody></table></div></div>);
 
 return(<div>
 {/* KPIs */}
@@ -1131,12 +1165,17 @@ return(<div>
 </div>
 
 {/* Tabs */}
-<div style={{display:"flex",gap:4,marginBottom:14,flexWrap:"wrap"}}>
-{[{id:"overview",l:"📊 Overview"},{id:"weekly",l:"📅 Weekly"},{id:"upload",l:"⬆ Upload Excel",admin:true},{id:"targets",l:"🎯 Set Targets",admin:true}].filter(t=>!t.admin||isAdmin).map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",background:tab===t.id?C.blueS:"transparent",color:tab===t.id?C.blue:C.sub,fontSize:10,fontWeight:tab===t.id?700:400,fontFamily:"inherit",borderBottom:tab===t.id?`2px solid ${C.blue}`:"2px solid transparent"}}>{t.l}</button>))}
-{isAdmin&&<div style={{marginRight:"auto"}}/> && <Bt onClick={exportExcel} v="ghost" sz="sm">⬇ Export Excel</Bt>}
+<div style={{display:"flex",gap:4,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+{[{id:"overview",l:"📊 Overview"},{id:"weekly",l:"📅 Weekly"},{id:"upload_branch",l:"⬆ Branch Sales",admin:true},{id:"upload_emp",l:"⬆ Employee Sales",admin:true},{id:"upload_targets",l:"⬆ Targets",admin:true},{id:"set_targets",l:"🎯 Set Target",admin:true}].filter(t=>!t.admin||isAdmin).map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"5px 12px",borderRadius:6,border:"none",cursor:"pointer",background:tab===t.id?C.blueS:"transparent",color:tab===t.id?C.blue:C.sub,fontSize:10,fontWeight:tab===t.id?700:400,fontFamily:"inherit"}}>{t.l}</button>))}
+<div style={{flex:1}}/>
+{isAdmin&&<div style={{display:"flex",gap:4}}>
+<Bt onClick={exportBranchExcel} v="ghost" sz="sm">⬇ Branch Excel</Bt>
+<Bt onClick={exportEmpExcel} v="ghost" sz="sm">⬇ Employee Excel</Bt>
+<Bt onClick={exportPDF} v="ghost" sz="sm">🖨 Print</Bt>
+</div>}
 </div>
 
-{/* Overview */}
+{/* ── Overview Tab ── */}
 {tab==="overview"&&<GC style={{overflow:"hidden"}}>
 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
 <thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["#","Branch","MTD Sales","Target","Remaining","Achievement","Gross %"].map(h=>(<th key={h} style={{padding:"9px 12px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700,textTransform:"uppercase"}}>{h}</th>))}</tr></thead>
@@ -1152,60 +1191,87 @@ return(<div>
 </table>
 </GC>}
 
-{/* Weekly */}
+{/* ── Weekly Tab ── */}
 {tab==="weekly"&&<div>
 {weeks.length===0?<Em icon="📅" title="No weekly data" msg="Upload daily sales to see weekly breakdown."/>:
 weeks.map(wk=>{const wData=weeklyByBranch[wk]||{};return(<GC key={wk} style={{marginBottom:10,overflow:"hidden"}}>
-<div style={{padding:"10px 16px",background:C.blueS,borderBottom:`1px solid ${C.bd}`,display:"flex",gap:8,alignItems:"center"}}>
-<span style={{fontSize:10,fontWeight:700,color:C.blue}}>📅 Week of {new Date(wk).toLocaleDateString()}</span>
-</div>
+<div style={{padding:"10px 16px",background:C.blueS,borderBottom:`1px solid ${C.bd}`}}><span style={{fontSize:10,fontWeight:700,color:C.blue}}>Week of {new Date(wk).toLocaleDateString()}</span></div>
 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
 <thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["Branch","Weekly Sales","ATV","UPT"].map(h=>(<th key={h} style={{padding:"7px 12px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700,textTransform:"uppercase"}}>{h}</th>))}</tr></thead>
 <tbody>{comm.map(b=>{const wd=wData[b.branch_id]||{};return(<tr key={b.branch_id} style={{borderBottom:`1px solid ${C.bd}`}}>
 <td style={{padding:"8px 12px",fontWeight:700,color:C.text}}>{b.branch_name}</td>
 <td style={{padding:"8px 12px",color:C.gold,fontWeight:700}}>{fE(wd.sales||0)}</td>
 <td style={{padding:"8px 12px",color:C.sub}}>{fE(wd.atv||0)}</td>
-<td style={{padding:"8px 12px",color:C.blue}}>{(wd.upt||0).toFixed(1)}</td>
+<td style={{padding:"8px 12px",color:C.blue}}>{(wd.upt||0).toFixed?.(1)||"0"}</td>
 </tr>);})}</tbody>
-</table>
-</GC>);})}
+</table></GC>);})}
 </div>}
 
-{/* Upload Excel */}
-{tab==="upload"&&<div>
-<GC style={{padding:"20px 24px",marginBottom:14}}>
-<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:8}}>Upload Sales Excel / CSV</div>
-<p style={{fontSize:12,color:C.sub,marginBottom:14}}>File columns: <code style={{background:"rgba(0,0,0,0.04)",padding:"1px 6px",borderRadius:4,fontFamily:"monospace"}}>branch_name, sale_date, total_sales, total_invoices, total_quantity, traffic</code></p>
-<input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleFile} style={{display:"none"}}/>
+{/* ── Upload Branch Sales ── */}
+{tab==="upload_branch"&&<GC style={{padding:"20px 24px"}}>
+<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:4}}>Upload Branch Daily Sales</div>
+<p style={{fontSize:11,color:C.sub,marginBottom:14}}>Columns: <code style={{background:"rgba(0,0,0,0.04)",padding:"1px 6px",borderRadius:4,fontSize:10}}>branch_name, sale_date, total_sales, total_invoices, total_quantity, traffic</code></p>
+<input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleBranchFile} style={{display:"none"}}/>
 <div style={{display:"flex",gap:10}}>
-<Bt onClick={()=>fileRef.current?.click()} v="gold" sz="lg" disabled={importing}>{importing?"Processing...":"📎 Choose File"}</Bt>
-{preview&&<Bt onClick={confirmImport} v="gold" sz="lg" disabled={importing}>{importing?"Importing...":"✓ Confirm Import"}</Bt>}
+<Bt onClick={()=>fileRef.current?.click()} v="gold" sz="lg" disabled={importing}>{importing?"...":"📎 Choose File"}</Bt>
+{preview&&<Bt onClick={confirmBranchImport} v="gold" sz="lg" disabled={importing}>{importing?"Importing...":"✓ Confirm Import"}</Bt>}
 </div>
-{preview&&<div style={{marginTop:14}}>
-<div style={{fontSize:10,fontWeight:700,color:C.text,marginBottom:8}}>Preview (first 5 rows):</div>
-<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
-<thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{Object.keys(preview[0]||{}).map(h=>(<th key={h} style={{padding:"6px 10px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700}}>{h}</th>))}</tr></thead>
-<tbody>{preview.map((r,i)=>(<tr key={i} style={{borderBottom:`1px solid ${C.bd}`}}>{Object.values(r).map((v,j)=>(<td key={j} style={{padding:"6px 10px",color:C.sub}}>{String(v)}</td>))}</tr>))}</tbody>
-</table></div>
-</div>}
-</GC>
-</div>}
+<PreviewTable data={preview}/>
+</GC>}
 
-{/* Set Targets */}
-{tab==="targets"&&<GC style={{padding:"20px 24px"}}>
-<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:14}}>Set Monthly Target</div>
+{/* ── Upload Employee Sales ── */}
+{tab==="upload_emp"&&<GC style={{padding:"20px 24px"}}>
+<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:4}}>Upload Employee Daily Sales</div>
+<p style={{fontSize:11,color:C.sub,marginBottom:14}}>Columns: <code style={{background:"rgba(0,0,0,0.04)",padding:"1px 6px",borderRadius:4,fontSize:10}}>employee_name, branch_name, sale_date, sales_amount, invoices, quantity</code></p>
+<input ref={empFileRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleEmpFile} style={{display:"none"}}/>
+<div style={{display:"flex",gap:10}}>
+<Bt onClick={()=>empFileRef.current?.click()} v="gold" sz="lg" disabled={importing}>{importing?"...":"📎 Choose File"}</Bt>
+{empPreview&&<Bt onClick={confirmEmpImport} v="gold" sz="lg" disabled={importing}>{importing?"Importing...":"✓ Confirm Import"}</Bt>}
+</div>
+<PreviewTable data={empPreview}/>
+{empPerf.length>0&&<div style={{marginTop:16}}>
+<div style={{fontSize:10,fontWeight:700,color:C.text,marginBottom:8}}>Current Employee Performance:</div>
+<table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
+<thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["Employee","Branch","Target","MTD Sales","Remaining","Achievement","UPT"].map(h=>(<th key={h} style={{padding:"7px 10px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700}}>{h}</th>))}</tr></thead>
+<tbody>{empPerf.map(e=>(<tr key={e.employee_id} style={{borderBottom:`1px solid ${C.bd}`}}>
+<td style={{padding:"7px 10px",fontWeight:700,color:C.text}}>{e.full_name}</td>
+<td style={{padding:"7px 10px",color:C.sub}}>{e.branch_name||"—"}</td>
+<td style={{padding:"7px 10px",color:C.sub}}>{fE(e.monthly_target)}</td>
+<td style={{padding:"7px 10px",color:C.gold,fontWeight:700}}>{fE(e.mtd_sales)}</td>
+<td style={{padding:"7px 10px",color:+e.remaining>0?C.amber:C.green}}>{fE(e.remaining)}</td>
+<td style={{padding:"7px 10px"}}><span style={{fontWeight:700,color:cC(+e.achievement_pct)}}>{e.achievement_pct}%</span></td>
+<td style={{padding:"7px 10px",color:C.blue}}>{(+e.upt||0).toFixed(1)}</td>
+</tr>))}</tbody></table></div>}
+</GC>}
+
+{/* ── Upload Targets ── */}
+{tab==="upload_targets"&&<GC style={{padding:"20px 24px"}}>
+<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:4}}>Upload Monthly Targets (All Branches)</div>
+<p style={{fontSize:11,color:C.sub,marginBottom:14}}>Columns: <code style={{background:"rgba(0,0,0,0.04)",padding:"1px 6px",borderRadius:4,fontSize:10}}>branch_name, target_month (YYYY-MM-01), monthly_target, gross_percentage, actual_sales</code></p>
+<input ref={targetFileRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleTargetFile} style={{display:"none"}}/>
+<div style={{display:"flex",gap:10}}>
+<Bt onClick={()=>targetFileRef.current?.click()} v="gold" sz="lg" disabled={importing}>{importing?"...":"📎 Choose File"}</Bt>
+{targetPreview&&<Bt onClick={confirmTargetImport} v="gold" sz="lg" disabled={importing}>{importing?"Importing...":"✓ Confirm Import"}</Bt>}
+</div>
+<PreviewTable data={targetPreview}/>
+</GC>}
+
+{/* ── Set Target (manual) ── */}
+{tab==="set_targets"&&<GC style={{padding:"20px 24px"}}>
+<div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:14}}>Set Monthly Target (One Branch)</div>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr auto",gap:10,alignItems:"flex-end"}}>
 <div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>BRANCH</label><select value={bForm.branch_id} onChange={e=>setBForm(p=>({...p,branch_id:e.target.value}))} style={iS}><option value="">Select...</option>{branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
 <div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>MONTH</label><input type="month" value={bForm.month} onChange={e=>setBForm(p=>({...p,month:e.target.value}))} style={iS}/></div>
-<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>TARGET (EGP)</label><input type="number" value={bForm.target} onChange={e=>setBForm(p=>({...p,target:e.target.value}))} placeholder="1400000" style={iS}/></div>
-<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>ACTUAL SALES</label><input type="number" value={bForm.actual} onChange={e=>setBForm(p=>({...p,actual:e.target.value}))} placeholder="850000" style={iS}/></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>TARGET</label><input type="number" value={bForm.target} onChange={e=>setBForm(p=>({...p,target:e.target.value}))} placeholder="1400000" style={iS}/></div>
+<div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>ACTUAL</label><input type="number" value={bForm.actual} onChange={e=>setBForm(p=>({...p,actual:e.target.value}))} placeholder="850000" style={iS}/></div>
 <div><label style={{fontSize:8,fontWeight:700,color:C.muted,display:"block",marginBottom:4}}>GROSS %</label><input type="number" step="0.1" value={bForm.gross} onChange={e=>setBForm(p=>({...p,gross:e.target.value}))} placeholder="42.5" style={iS}/></div>
 <Bt onClick={saveBranchTarget} v="gold" sz="lg">Save →</Bt>
 </div>
 </GC>}
 </div>);}
 
-const PM={dash:"Dashboard",war:"War Room",reports:"Reports",new_report:"New Report",rpt_detail:"Report Detail",tasks:"Tasks",new_task:"New Task",incidents:"Incidents",new_incident:"Report Issue",sales:"Sales & Targets",vm:"VM Academy",sales_upload:"Sales Upload",branches:"Stores",branch_twin:"Store Detail",employees:"Employees",emp_detail:"Employee Profile",learning:"Learning",cx:"CX Readiness",ai:"AI Insights",notifs:"Notifications",activity:"Activity",users:"Users",settings:"Settings"};
+
+const PM={dash:"Dashboard",reports:"Reports",new_report:"New Report",rpt_detail:"Report Detail",tasks:"Tasks",new_task:"New Task",sales:"Sales & Targets",team:"My Team",ai:"AI Insights",notifs:"Notifications",users:"Users",settings:"Settings",emp_detail:"Employee Profile",branch_twin:"Store Detail",incidents:"Incidents",new_incident:"Report Issue",vm:"VM Academy",branches:"Stores",employees:"Employees",cx:"CX Readiness",learning:"Learning",activity:"Activity",sales_upload:"Sales Upload"};
 
 function App(){const{user,profile,rdy,sessionRole,setSessionRole,effectiveRole}=useAuth();const[pg,rawSetPg]=useState("dash");const[rC,sRC]=useState(null);const[brC,sBrC]=useState(null);const[empC,sEmpC]=useState(null);
 const[sideOpen,setSideOpen]=useState(false);
@@ -1236,11 +1302,11 @@ return(<div style={{minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans','Int
 {pg==="reports"&&<ReportsPage setPg={setPg} setCtx={sRC}/>}
 {pg==="new_report"&&<NewReport setPg={setPg}/>}
 {pg==="rpt_detail"&&<RptDetail rpt={rC} setPg={setPg}/>}
-{pg==="tasks"&&<TasksPage setPg={setPg}/>}
-{pg==="new_task"&&<NewTask setPg={setPg}/>}
+{pg==="tasks"&&<TasksV2 setPg={setPg}/>}
+{pg==="new_task"&&<TasksV2 setPg={setPg}/>}
 {pg==="incidents"&&<IncidentsPage setPg={setPg}/>}
 {pg==="new_incident"&&<NewIncident setPg={setPg}/>}
-{pg==="sales"&&<SalesPage setPg={setPg}/>}
+{pg==="sales"&&<SalesV2/>}
 {pg==="vm"&&<VMAcademy/>}
 {pg==="branches"&&<BranchesPage setPg={setPg}/>}
 {pg==="branch_twin"&&brC&&<BranchTwin branch={brC} setPg={setPg}/>}
@@ -1258,4 +1324,3 @@ return(<div style={{minHeight:"100vh",background:C.bg,fontFamily:"'DM Sans','Int
 </div></main></div>);}
 
 export default function RavinAcademy(){return <TP><AP><App/></AP></TP>;}
-
