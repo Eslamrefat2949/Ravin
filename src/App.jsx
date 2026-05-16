@@ -148,7 +148,6 @@ return(<div style={{minHeight:"100vh",background:"#F0F4F8",display:"flex",alignI
 // SIDEBAR
 // ═══════════════════════════════════════════════════════════════════════
 function Side({pg,setPg,profile:p,nC,effectiveRole:er,sideOpen,setSideOpen}){const{logout}=useAuth();
-const nav=[
   const nav=[
   {id:"dash",l:"Dashboard",i:"◈",g:"CORE"},
   {id:"reports",l:"Reports",i:"◉",g:"OPS"},{id:"new_report",l:"New Report",i:"✚",g:"OPS",hl:1},
