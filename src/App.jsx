@@ -241,7 +241,7 @@ function BranchTwin({branch,setPg}){
 // ═══════════════════════════════════════════════════════════════════════
 function EmpDetail({emp,setPg}){
 const{bm,profile:me}=useAuth();const{toast}=useToast();
-const{data:perf,reload:rldP}=useQ("employee_targets",`employee_id=eq.${emp.id}`);
+const{data:perf,reload:rldP}=useQ("employee_monthly_performance",`employee_id=eq.${emp.id}`);
 const{data:tasks}=useQ("tasks",`assigned_to=eq.${emp.id}&is_deleted=eq.false&order=created_at.desc&limit=10`);
 const{data:training}=useQ("training_completions",`user_id=eq.${emp.id}`);
 const{data:attendance}=useQ("attendance_logs",`user_id=eq.${emp.id}&order=log_date.desc&limit=30`);
@@ -618,7 +618,7 @@ return(<div>
 <GC style={{overflow:"hidden"}}>
 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
 <thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["Employee","Branch","Target","MTD Sales","Remaining","Achievement %","UPT"].map(h=>(<th key={h} style={{padding:"9px 12px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700,textTransform:"uppercase"}}>{h}</th>))}</tr></thead>
-<tbody>{empPerf.map(e=>(<tr key={e.id||e.employee_id} style={{borderBottom:`1px solid ${C.bd}`}}>
+<tbody>{empPerf.map(e=>(<tr key={e.employee_id||e.id} style={{borderBottom:`1px solid ${C.bd}`}}>
 <td style={{padding:"9px 12px",fontWeight:700,color:C.text}}>{e.full_name}</td>
 <td style={{padding:"9px 12px",color:C.sub}}>{e.branch_name||"—"}</td>
 <td style={{padding:"9px 12px",color:C.sub}}>{fE(e.monthly_target)}</td>
@@ -646,7 +646,7 @@ return(<div>
 <GC style={{overflow:"hidden"}}>
 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
 <thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["Employee","Target","MTD Sales","Remaining","Achievement","UPT","ATV"].map(h=>(<th key={h} style={{padding:"9px 12px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700,textTransform:"uppercase"}}>{h}</th>))}</tr></thead>
-<tbody>{empPerf.map(e=>(<tr key={e.id||e.employee_id} style={{borderBottom:`1px solid ${C.bd}`}}>
+<tbody>{empPerf.map(e=>(<tr key={e.employee_id||e.id} style={{borderBottom:`1px solid ${C.bd}`}}>
 <td style={{padding:"9px 12px",fontWeight:700,color:C.text}}>{e.full_name}</td>
 <td style={{padding:"9px 12px",color:C.sub}}>{fE(e.monthly_target)}</td>
 <td style={{padding:"9px 12px",color:C.gold,fontWeight:700}}>{fE(e.mtd_sales)}</td>
@@ -1067,8 +1067,8 @@ return(<GC key={t.id} style={{padding:"12px 16px",marginBottom:6,borderRight:`3p
 // ═══════════════════════════════════════════════════════════════════════
 function SalesV2(){
 const{data:comm,loading,reload}=useQ("commercial_overview","order=mtd_achievement_pct.desc");
-const{data:weekly}=useQ("daily_sales","order=sale_date.desc&limit=100");
-const{data:empPerf}=useQ("sales_staff","order=full_name");
+const{data:weekly}=useQ("weekly_branch_performance","order=week_start.desc");
+const{data:empPerf}=useQ("employee_monthly_performance","order=full_name");
 const{profile,branches}=useAuth();const{toast}=useToast();
 const isAdmin=["admin","area_manager"].includes(profile?.effectiveRole||profile?.role);
 const[tab,setTab]=useState("overview");
@@ -1140,7 +1140,7 @@ toast("Branch sales exported!","success");}catch(e){toast("Export error: "+e.mes
 
 const exportEmpExcel=async()=>{
 try{const{utils,writeFile}=await loadXLSX();
-const rows=empPerf.map(e=>({Employee:e.full_name||"",Branch:e.branch_name||"",Position:e.position||"",Phone:e.phone||""}));
+const rows=empPerf.map(e=>({Employee:e.full_name||"",Branch:e.branch_name||"",Target:+e.monthly_target||0,MTD_Sales:+e.mtd_sales||0,Remaining:+e.remaining||0,"Achievement_%":+e.achievement_pct||0}));
 const ws=utils.json_to_sheet(rows);const wb=utils.book_new();utils.book_append_sheet(wb,ws,"Employee_Performance");
 writeFile(wb,`RAVIN_Employee_Performance_${new Date().toISOString().slice(0,10)}.xlsx`);
 toast("Employee data exported!","success");}catch(e){toast("Export error: "+e.message,"error");}};
@@ -1155,10 +1155,8 @@ toast("Saved!","success");reload();}catch(e){toast(e.message,"error");}};
 const tS=comm.reduce((s,c)=>s+(+c.mtd_sales||0),0);
 const tT=comm.reduce((s,c)=>s+(+c.monthly_target||0),0);
 const aA=tT?Math.round(tS/tT*100):0;
-// Group daily_sales into weeks
-const getWeekStart=(d)=>{const dt=new Date(d);dt.setDate(dt.getDate()-dt.getDay());return dt.toISOString().slice(0,10);};
-const weeks=[...new Set(weekly.map(w=>getWeekStart(w.sale_date)))].slice(0,4);
-const weeklyByBranch={};weekly.forEach(w=>{const wk=getWeekStart(w.sale_date);if(!weeklyByBranch[wk])weeklyByBranch[wk]={};if(!weeklyByBranch[wk][w.branch_id])weeklyByBranch[wk][w.branch_id]={sales:0,atv:0,upt:0,count:0};weeklyByBranch[wk][w.branch_id].sales+=(+w.total_sales||0);weeklyByBranch[wk][w.branch_id].atv+=(+w.atv||0);weeklyByBranch[wk][w.branch_id].upt+=(+w.upt||0);weeklyByBranch[wk][w.branch_id].count++;});
+const weeks=[...new Set(weekly.map(w=>w.week_start))].slice(0,4);
+const weeklyByBranch={};weekly.forEach(w=>{if(!weeklyByBranch[w.week_start])weeklyByBranch[w.week_start]={};weeklyByBranch[w.week_start][w.branch_id]={sales:w.weekly_sales,atv:w.weekly_atv,upt:w.weekly_upt};});
 
 if(loading)return <Ld/>;
 
@@ -1239,7 +1237,7 @@ weeks.map(wk=>{const wData=weeklyByBranch[wk]||{};return(<GC key={wk} style={{ma
 <div style={{fontSize:10,fontWeight:700,color:C.text,marginBottom:8}}>Current Employee Performance:</div>
 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
 <thead><tr style={{borderBottom:`1px solid ${C.bd}`}}>{["Employee","Branch","Target","MTD Sales","Remaining","Achievement","UPT"].map(h=>(<th key={h} style={{padding:"7px 10px",textAlign:"left",fontSize:8,color:C.muted,fontWeight:700}}>{h}</th>))}</tr></thead>
-<tbody>{empPerf.map(e=>(<tr key={e.id||e.employee_id} style={{borderBottom:`1px solid ${C.bd}`}}>
+<tbody>{empPerf.map(e=>(<tr key={e.employee_id||e.id} style={{borderBottom:`1px solid ${C.bd}`}}>
 <td style={{padding:"7px 10px",fontWeight:700,color:C.text}}>{e.full_name}</td>
 <td style={{padding:"7px 10px",color:C.sub}}>{e.branch_name||"—"}</td>
 <td style={{padding:"7px 10px",color:C.sub}}>{fE(e.monthly_target)}</td>
