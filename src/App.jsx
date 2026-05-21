@@ -1093,7 +1093,7 @@ const confirmBranchImport=async()=>{
 if(!preview)return;setImporting(true);
 try{const{read,utils}=await loadXLSX();const wb=read(await fileRef.current.files[0].arrayBuffer());
 const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-const res=await sb.rpc("bulk_upsert_daily_sales",{p_rows:JSON.stringify(rows)});
+const res=await sb.rpc("bulk_upsert_daily_sales",{p_rows:rows});
 toast(`Imported ${res} branch sales records!`,"success");setPreview(null);reload();}catch(e){toast(e.message,"error");}setImporting(false);};
 
 // ── Employee Sales Upload ──
@@ -1106,7 +1106,7 @@ const confirmEmpImport=async()=>{
 if(!empPreview)return;setImporting(true);
 try{const{read,utils}=await loadXLSX();const wb=read(await empFileRef.current.files[0].arrayBuffer());
 const rows=utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-const res=await sb.rpc("bulk_upsert_employee_sales",{p_rows:JSON.stringify(rows)});
+const res=await sb.rpc("bulk_upsert_employee_sales",{p_rows:rows});
 toast(`Imported ${res} employee sales records!`,"success");setEmpPreview(null);reload();}catch(e){toast(e.message,"error");}setImporting(false);};
 
 // ── Targets Upload (branches) ──
